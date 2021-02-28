@@ -1,7 +1,7 @@
-from os import listdir, path, mkdir
+from os import listdir, path, mkdir, remove
 import re
 
-# Filtering the files in input directory
+# Filter files in input directory
 files = []
 p = re.compile(r'entrada\d+.txt', re.IGNORECASE)
 for file in listdir('input'):
@@ -9,11 +9,16 @@ for file in listdir('input'):
     if(path.isfile(filePath) and p.match(file)):
         files.append(filePath)
 
-# Creating output directory
+# Create output directory
 if (not path.exists('output')):    
     mkdir('output')
+else: #Delete all remaining files in output
+    for f in listdir('output'):
+        if(path.isfile(path.join('output', f))):
+            remove(path.join('output', f))
 
-# Creating output files
+
+# Create output files
 for filePath in files:
     inputFile = open(filePath)
     number = re.search(r'\d+', filePath)[0]
