@@ -1,27 +1,6 @@
 from os import listdir, path, mkdir, remove
 import re
-
-reservedWords = ['var', 'const', 'typedef', 'struct', 'extends', 'procedure',
-                 'function', 'start', 'return', 'if', 'else', 'then', 'while',
-                 'read', 'print', 'int', 'real', 'boolean', 'string', 'true',
-                 'false', 'global', 'local']
-
-letter = re.compile(r'[a-zA-Z]')
-letterDigit_ = re.compile(r'[a-zA-Z0-9_]')
-
-errors = []
-
-def isIdentifierOrReservedWord(line, position):
-    lexeme = ''
-    for i in range(position, len(line)):
-        char = line[i]
-        if(letterDigit_.match(char)):
-            lexeme += char
-        else:
-            if lexeme in reservedWords:
-                return {"lexeme": lexeme, "type": "PRE", "next": i}
-            else:
-                return {"lexeme": lexeme, "type": "IDE", "next": i}
+from lexical_analyser import LexicalAnalyser
 
 
 def removeLineComment(line):
@@ -82,22 +61,10 @@ for filePath in files:
     inputFile = open(filePath)
     number = re.search(r'\d+', filePath)[0]
     outputFile = open('output/saida'+number+'.txt', 'w')
-    lines = inputFile.readlines()
-    lines = removeMultiLineComments(lines)
-    for i in range(len(lines)):
-        line = lines[i]
-        line = removeLineComment(line)
-        j = 0
-        while j < len(line):
-            char = line[j]
-            if(letter.match(char)):  # Identificador ou palavra reservada
-                token = isIdentifierOrReservedWord(line, j)
-                outputFile.write(
-                    str(i+1)+' '+token['type']+' '+token['lexeme']+'\n'
-                )
-                j = token['next']
-            else:
-                j += 1
-    writeErrors(outputFile)    
+    source_code = inputFile.readlines()
+    lexical_analyser = LexicalAnalyser(source_code)
+    lexical_analyser.analyse()
+    lexical_analyser.write_tokens(outputFile)
+    lexical_analyser.write_errors(outputFile)    
     outputFile.close()
     inputFile.close()
