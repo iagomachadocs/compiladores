@@ -8,6 +8,7 @@ RESERVED_WORDS = ['var', 'const', 'typedef', 'struct', 'extends', 'procedure',
 
 LETTER = re.compile(r'[a-zA-Z]')
 LETTER_DIGIT_UNDERSCORE = re.compile(r'[a-zA-Z0-9_]')
+SIMBOL = re.compile(r'[\x20|\x21|\x23-\x7E]')
 
 class LexicalAnalyser:
 
@@ -35,7 +36,7 @@ class LexicalAnalyser:
         return
   
   def __multiline_comment__(self):
-    comment_line = self.line_index
+    comment_line = self.line_index+1
     comment = ''
     while (self.line_index < len(self.source_code)):
       while (self.column_index < len(self.source_code[self.line_index])):
@@ -54,7 +55,38 @@ class LexicalAnalyser:
     error = Token(comment_line, "CoMF", comment)
     self.errors.append(error)
     return False
-
+  
+  def __string__(self):
+    string_line = self.line_index+1
+    string = self.source_code[self.line_index][self.column_index]
+    self.__next_column__()
+    while (self.column_index < len(self.source_code[self.line_index])):
+      char = self.source_code[self.line_index][self.column_index]
+      if(char == '\\'):
+        string += char
+        if(self.column_index+1 < len(self.source_code[self.line_index])):
+          self.__next_column__()
+          char = self.source_code[self.line_index][self.column_index]
+          if(SIMBOL.match(char) or char == '\"'):
+            string += char
+            self.__next_column__()
+          else:
+            error = Token(string_line, "CMF", string)
+            self.errors.append(error)
+            return
+      elif(SIMBOL.match(char)):
+        string += char
+        self.__next_column__()
+      elif(char == '\"'):
+        string += char
+        token = Token(string_line, "CAD", string)
+        self.tokens.append(token)
+        self.__next_column__()
+        return
+      else:
+        error = Token(string_line, "CMF", string)
+        self.errors.append(error)
+        return
 
   def analyse(self):
     while (self.line_index < len(self.source_code)):
@@ -73,6 +105,8 @@ class LexicalAnalyser:
                 return
             else:
               self.__next_column__()
+        elif(char == '\"'):
+          self.__string__()
         else:
           self.__next_column__()
       self.__next_line__()
