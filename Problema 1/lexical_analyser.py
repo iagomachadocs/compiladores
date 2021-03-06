@@ -9,6 +9,7 @@ RESERVED_WORDS = ['var', 'const', 'typedef', 'struct', 'extends', 'procedure',
 LETTER = re.compile(r'[a-zA-Z]')
 LETTER_DIGIT_UNDERSCORE = re.compile(r'[a-zA-Z0-9_]')
 SIMBOL = re.compile(r'[\x20|\x21|\x23-\x7E]')
+ARITHMETIC_OPERATOR = re.compile(r'[\+|\-|\*|\/]')
 
 class LexicalAnalyser:
 
@@ -87,6 +88,32 @@ class LexicalAnalyser:
         error = Token(string_line, "CMF", string)
         self.errors.append(error)
         return
+  
+  def __arithmetic_operator__(self):
+    char = self.source_code[self.line_index][self.column_index]
+    if(char == '+'):
+      operator = '+'
+      if(self.column_index+1 < len(self.source_code[self.line_index])):
+        self.__next_column__()
+        char = self.source_code[self.line_index][self.column_index]
+        if(char == '+'):
+          operator = '++'
+      token = Token(self.line_index+1, "ART", operator)
+      self.tokens.append(token)
+    elif(char == '-'):
+      operator = '-'
+      if(self.column_index+1 < len(self.source_code[self.line_index])):
+        self.__next_column__()
+        char = self.source_code[self.line_index][self.column_index]
+        if(char == '-'):
+          operator = '--'
+      token = Token(self.line_index+1, "ART", operator)
+      self.tokens.append(token)
+    else:
+      operator = char
+      token = Token(self.line_index+1, "ART", operator)
+      self.tokens.append(token)
+    self.__next_column__()
 
   def analyse(self):
     while (self.line_index < len(self.source_code)):
@@ -104,7 +131,11 @@ class LexicalAnalyser:
               if(not closed):
                 return
             else:
+              token = Token(self.line_index+1, "ART", char)
+              self.tokens.append(token)
               self.__next_column__()
+        elif(ARITHMETIC_OPERATOR.match(char)):
+          self.__arithmetic_operator__()
         elif(char == '\"'):
           self.__string__()
         else:
