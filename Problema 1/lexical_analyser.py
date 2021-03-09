@@ -6,10 +6,13 @@ RESERVED_WORDS = ['var', 'const', 'typedef', 'struct', 'extends', 'procedure',
                  'read', 'print', 'int', 'real', 'boolean', 'string', 'true',
                  'false', 'global', 'local']
 
-LETTER = re.compile(r'[a-zA-Z]')
-LETTER_DIGIT_UNDERSCORE = re.compile(r'[a-zA-Z0-9_]')
-SIMBOL = re.compile(r'[\x20|\x21|\x23-\x7E]')
-ARITHMETIC_OPERATOR = re.compile(r'[\+|\-|\*|\/]')
+DELIMITERS = ['.', ',', '(', ')', ';', '[', ']', '{', '}']
+
+RE_LETTER = re.compile(r'[a-zA-Z]')
+RE_LETTER_DIGIT_UNDERSCORE = re.compile(r'[a-zA-Z0-9_]')
+RE_SIMBOL = re.compile(r'[\x20|\x21|\x23-\x7E]')
+RE_ARITHMETIC_OPERATOR = re.compile(r'[\+|\-|\*|\/]')
+
 
 class LexicalAnalyser:
 
@@ -25,7 +28,7 @@ class LexicalAnalyser:
     line = self.source_code[self.line_index]
     while (self.column_index < len(line)):
       char = line[self.column_index]
-      if(LETTER_DIGIT_UNDERSCORE.match(char)):
+      if(RE_LETTER_DIGIT_UNDERSCORE.match(char)):
         lexeme += char
         self.__next_column__()
       else:
@@ -68,14 +71,14 @@ class LexicalAnalyser:
         if(self.column_index+1 < len(self.source_code[self.line_index])):
           self.__next_column__()
           char = self.source_code[self.line_index][self.column_index]
-          if(SIMBOL.match(char) or char == '\"'):
+          if(RE_SIMBOL.match(char) or char == '\"'):
             string += char
             self.__next_column__()
           else:
             error = Token(string_line, "CMF", string)
             self.errors.append(error)
             return
-      elif(SIMBOL.match(char)):
+      elif(RE_SIMBOL.match(char)):
         string += char
         self.__next_column__()
       elif(char == '\"'):
@@ -115,11 +118,17 @@ class LexicalAnalyser:
       self.tokens.append(token)
     self.__next_column__()
 
+  def __delimiter__(self):
+    char = self.source_code[self.line_index][self.column_index]
+    token = Token(self.line_index+1, "DEL", char)
+    self.tokens.append(token)
+    self.__next_column__()
+
   def analyse(self):
     while (self.line_index < len(self.source_code)):
       while (self.column_index < len(self.source_code[self.line_index])):
         char = self.source_code[self.line_index][self.column_index]
-        if(LETTER.match(char)):
+        if(RE_LETTER.match(char)):
           self.__identifier_or_reserved_word__()
         elif(char == '/'):
           if(self.column_index+1 < len(self.source_code[self.line_index])):
@@ -134,10 +143,12 @@ class LexicalAnalyser:
               token = Token(self.line_index+1, "ART", char)
               self.tokens.append(token)
               self.__next_column__()
-        elif(ARITHMETIC_OPERATOR.match(char)):
+        elif(RE_ARITHMETIC_OPERATOR.match(char)):
           self.__arithmetic_operator__()
         elif(char == '\"'):
           self.__string__()
+        elif(char in DELIMITERS):
+          self.__delimiter__()
         else:
           self.__next_column__()
       self.__next_line__()
