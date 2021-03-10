@@ -7,11 +7,13 @@ RESERVED_WORDS = ['var', 'const', 'typedef', 'struct', 'extends', 'procedure',
                  'false', 'global', 'local']
 
 DELIMITERS = ['.', ',', '(', ')', ';', '[', ']', '{', '}']
+LOGICAL_OPERATORS = ['&', '|', '!']
+ARITHMETIC_OPERATORS = ['+','-','*','/']
 
 RE_LETTER = re.compile(r'[a-zA-Z]')
 RE_LETTER_DIGIT_UNDERSCORE = re.compile(r'[a-zA-Z0-9_]')
 RE_SIMBOL = re.compile(r'[\x20|\x21|\x23-\x7E]')
-RE_ARITHMETIC_OPERATOR = re.compile(r'[\+|\-|\*|\/]')
+
 
 
 class LexicalAnalyser:
@@ -91,6 +93,33 @@ class LexicalAnalyser:
         error = Token(string_line, "CMF", string)
         self.errors.append(error)
         return
+
+  def __logical_operators__(self, char):
+    operator = char
+    if(self.column_index+1 < len(self.source_code[self.line_index])):
+      self.__next_column__()
+      next_char = self.source_code[self.line_index][self.column_index]
+      if(char == '!'):
+        if(next_char != '='):
+          token = Token(self.line_index+1, "LOG", operator)
+          self.tokens.append(token)
+        else:
+          operator += next_char
+          token = Token(self.line_index+1, "REL", operator)
+          self.tokens.append(token)
+          self.__next_column__()
+      elif(char == next_char):
+        operator += next_char
+        token = Token(self.line_index+1, "LOG", operator)
+        self.tokens.append(token)
+        self.__next_column__()
+      else:
+        error = Token(self.line_index+1, "OpMF", operator)
+        self.errors.append(error)
+    else:
+      token = Token(self.line_index+1, "LOG", operator)
+      self.tokens.append(token)
+      self.__next_column__()
   
   def __arithmetic_operator__(self):
     char = self.source_code[self.line_index][self.column_index]
@@ -143,12 +172,18 @@ class LexicalAnalyser:
               token = Token(self.line_index+1, "ART", char)
               self.tokens.append(token)
               self.__next_column__()
-        elif(RE_ARITHMETIC_OPERATOR.match(char)):
+          else:
+            token = Token(self.line_index+1, "ART", char)
+            self.tokens.append(token)
+            self.__next_column__()
+        elif(char in ARITHMETIC_OPERATORS):
           self.__arithmetic_operator__()
         elif(char == '\"'):
           self.__string__()
         elif(char in DELIMITERS):
           self.__delimiter__()
+        elif(char in LOGICAL_OPERATORS):
+          self.__logical_operators__(char)
         else:
           self.__next_column__()
       self.__next_line__()
