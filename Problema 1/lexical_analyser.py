@@ -44,18 +44,20 @@ class LexicalAnalyser:
   
   def __multiline_comment__(self):
     comment_line = self.line_index+1
-    comment = ''
+    comment = '/*'
+    self.__next_column__()
     while (self.line_index < len(self.source_code)):
       while (self.column_index < len(self.source_code[self.line_index])):
-        char = self.source_code[self.line_index][self.column_index]
+        char = self.__get_char__()
         comment += char
-        if(char == '*' and self.column_index+1 < len(self.source_code[self.line_index])):
-          next_char = self.source_code[self.line_index][self.column_index+1]
-          if(next_char == '/'):
-            self.__next_column__()
+        if(char == '*' and self.__has_next_column__()):
+          self.__next_column__()
+          char = self.__get_char__()
+          if(char == '/'):
             self.__next_column__()
             return True
-        self.__next_column__()
+        else:
+          self.__next_column__()
       self.__next_line__()
       comment += '\t'
     
@@ -65,15 +67,15 @@ class LexicalAnalyser:
   
   def __string__(self):
     string_line = self.line_index+1
-    string = self.source_code[self.line_index][self.column_index]
+    string = self.__get_char__()
     self.__next_column__()
     while (self.column_index < len(self.source_code[self.line_index])):
-      char = self.source_code[self.line_index][self.column_index]
+      char = self.__get_char__()
       if(char == '\\'):
         string += char
-        if(self.column_index+1 < len(self.source_code[self.line_index])):
+        if(self.__has_next_column__()):
           self.__next_column__()
-          char = self.source_code[self.line_index][self.column_index]
+          char = self.__get_char__()
           if(RE_SIMBOL.match(char) or char == '\"'):
             string += char
             self.__next_column__()
@@ -97,9 +99,9 @@ class LexicalAnalyser:
 
   def __logical_operator__(self, char):
     operator = char
-    if(self.column_index+1 < len(self.source_code[self.line_index])):
+    if(self.__has_next_column__()):
       self.__next_column__()
-      next_char = self.source_code[self.line_index][self.column_index]
+      next_char = self.__get_char__()
       if(char == '!'):
         if(next_char != '='):
           token = Token(self.line_index+1, "LOG", operator)
@@ -127,7 +129,7 @@ class LexicalAnalyser:
       operator = '+'
       if(self.__has_next_column__()):
         self.__next_column__()
-        char = self.source_code[self.line_index][self.column_index]
+        char = self.__get_char__()
         if(char == '+'):
           operator = '++'
           self.__next_column__()
@@ -137,7 +139,7 @@ class LexicalAnalyser:
       operator = '-'
       if(self.__has_next_column__()):
         self.__next_column__()
-        char = self.source_code[self.line_index][self.column_index]
+        char = self.__get_char__()
         if(char == '-'):
           operator = '--'
           self.__next_column__()
@@ -150,7 +152,7 @@ class LexicalAnalyser:
       self.__next_column__()
 
   def __delimiter__(self):
-    char = self.source_code[self.line_index][self.column_index]
+    char = self.__get_char__()
     token = Token(self.line_index+1, "DEL", char)
     self.tokens.append(token)
     self.__next_column__()
@@ -159,7 +161,7 @@ class LexicalAnalyser:
     number = char
     self.__next_column__()
     while (self.column_index < len(self.source_code[self.line_index])):
-      char = self.source_code[self.line_index][self.column_index]
+      char = self.__get_char__()
       if(char in DIGITS):
         number += char
         self.__next_column__()
@@ -167,10 +169,10 @@ class LexicalAnalyser:
         number += char
         if(self.__has_next_column__()):
           self.__next_column__()
-          char = self.source_code[self.line_index][self.column_index]
+          char = self.__get_char__()
           if(char in DIGITS):
             while (self.column_index < len(self.source_code[self.line_index])):
-              char = self.source_code[self.line_index][self.column_index]
+              char = self.__get_char__()
               if(char in DIGITS):
                 number += char
                 self.__next_column__()
@@ -199,15 +201,16 @@ class LexicalAnalyser:
   def analyse(self):
     while (self.line_index < len(self.source_code)):
       while (self.column_index < len(self.source_code[self.line_index])):
-        char = self.source_code[self.line_index][self.column_index]
+        char = self.__get_char__()
         if(RE_LETTER.match(char)):
           self.__identifier_or_reserved_word__()
         elif(char == '/'):
-          if(self.column_index+1 < len(self.source_code[self.line_index])):
-            next_char = self.source_code[self.line_index][self.column_index+1]
-            if(next_char == '/'):
+          if(self.__has_next_column__()):
+            self.__next_column__()
+            char = self.__get_char__()
+            if(char == '/'):
               self.__next_line__() # Comentário de linha
-            elif(next_char == '*'):
+            elif(char == '*'):
               closed = self.__multiline_comment__() # Comentário de bloco
               if(not closed):
                 return
@@ -241,7 +244,6 @@ class LexicalAnalyser:
     for error in self.errors:
       output.write(error.__str__()+'\n')
 
-
   def __next_line__(self):
     self.line_index += 1
     self.column_index = 0
@@ -251,3 +253,6 @@ class LexicalAnalyser:
 
   def __has_next_column__(self):
     return self.column_index+1 < len(self.source_code[self.line_index])
+
+  def __get_char__(self):
+    return self.source_code[self.line_index][self.column_index]
