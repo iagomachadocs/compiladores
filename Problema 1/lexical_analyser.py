@@ -1,14 +1,15 @@
 import re
 from token import Token
 
-RESERVED_WORDS = ['var', 'const', 'typedef', 'struct', 'extends', 'procedure',
+RESERVED_WORDS = set(['var', 'const', 'typedef', 'struct', 'extends', 'procedure',
                  'function', 'start', 'return', 'if', 'else', 'then', 'while',
                  'read', 'print', 'int', 'real', 'boolean', 'string', 'true',
-                 'false', 'global', 'local']
+                 'false', 'global', 'local'])
 
-DELIMITERS = ['.', ',', '(', ')', ';', '[', ']', '{', '}']
-LOGICAL_OPERATORS = ['&', '|', '!']
-ARITHMETIC_OPERATORS = ['+','-','*','/']
+DELIMITERS = set(['.', ',', '(', ')', ';', '[', ']', '{', '}'])
+LOGICAL_OPERATORS = set(['&', '|', '!'])
+ARITHMETIC_OPERATORS = set(['+','-','*','/'])
+DIGITS = set(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'])
 
 RE_LETTER = re.compile(r'[a-zA-Z]')
 RE_LETTER_DIGIT_UNDERSCORE = re.compile(r'[a-zA-Z0-9_]')
@@ -94,7 +95,7 @@ class LexicalAnalyser:
         self.errors.append(error)
         return
 
-  def __logical_operators__(self, char):
+  def __logical_operator__(self, char):
     operator = char
     if(self.column_index+1 < len(self.source_code[self.line_index])):
       self.__next_column__()
@@ -121,31 +122,32 @@ class LexicalAnalyser:
       self.tokens.append(token)
       self.__next_column__()
   
-  def __arithmetic_operator__(self):
-    char = self.source_code[self.line_index][self.column_index]
+  def __arithmetic_operator__(self, char):
     if(char == '+'):
       operator = '+'
-      if(self.column_index+1 < len(self.source_code[self.line_index])):
+      if(self.__has_next_column__()):
         self.__next_column__()
         char = self.source_code[self.line_index][self.column_index]
         if(char == '+'):
           operator = '++'
+          self.__next_column__()
       token = Token(self.line_index+1, "ART", operator)
       self.tokens.append(token)
     elif(char == '-'):
       operator = '-'
-      if(self.column_index+1 < len(self.source_code[self.line_index])):
+      if(self.__has_next_column__()):
         self.__next_column__()
         char = self.source_code[self.line_index][self.column_index]
         if(char == '-'):
           operator = '--'
+          self.__next_column__()
       token = Token(self.line_index+1, "ART", operator)
       self.tokens.append(token)
     else:
       operator = char
       token = Token(self.line_index+1, "ART", operator)
       self.tokens.append(token)
-    self.__next_column__()
+      self.__next_column__()
 
   def __delimiter__(self):
     char = self.source_code[self.line_index][self.column_index]
@@ -153,6 +155,47 @@ class LexicalAnalyser:
     self.tokens.append(token)
     self.__next_column__()
 
+  def __number__(self, char):
+    number = char
+    self.__next_column__()
+    while (self.column_index < len(self.source_code[self.line_index])):
+      char = self.source_code[self.line_index][self.column_index]
+      if(char in DIGITS):
+        number += char
+        self.__next_column__()
+      elif(char == '.'):
+        number += char
+        if(self.__has_next_column__()):
+          self.__next_column__()
+          char = self.source_code[self.line_index][self.column_index]
+          if(char in DIGITS):
+            while (self.column_index < len(self.source_code[self.line_index])):
+              char = self.source_code[self.line_index][self.column_index]
+              if(char in DIGITS):
+                number += char
+                self.__next_column__()
+              else:
+                token = Token(self.line_index+1, "NRO", number)
+                self.tokens.append(token)
+                return
+          else:
+            error = Token(self.line_index+1, "NMF", number)
+            self.errors.append(error)
+            return
+        else:
+          error = Token(self.line_index+1, "NMF", number)
+          self.errors.append(error)
+          return
+      else:
+        token = Token(self.line_index+1, "NRO", number)
+        self.tokens.append(token)
+        return
+    token = Token(self.line_index+1, "NRO", number)
+    self.tokens.append(token)
+    return
+
+      
+      
   def analyse(self):
     while (self.line_index < len(self.source_code)):
       while (self.column_index < len(self.source_code[self.line_index])):
@@ -177,13 +220,15 @@ class LexicalAnalyser:
             self.tokens.append(token)
             self.__next_column__()
         elif(char in ARITHMETIC_OPERATORS):
-          self.__arithmetic_operator__()
+          self.__arithmetic_operator__(char)
         elif(char == '\"'):
           self.__string__()
         elif(char in DELIMITERS):
           self.__delimiter__()
         elif(char in LOGICAL_OPERATORS):
-          self.__logical_operators__(char)
+          self.__logical_operator__(char)
+        elif(char in DIGITS):
+          self.__number__(char)
         else:
           self.__next_column__()
       self.__next_line__()
@@ -204,4 +249,5 @@ class LexicalAnalyser:
   def __next_column__(self):
     self.column_index += 1
 
-  
+  def __has_next_column__(self):
+    return self.column_index+1 < len(self.source_code[self.line_index])
