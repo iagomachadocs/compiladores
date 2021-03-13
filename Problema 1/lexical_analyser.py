@@ -10,6 +10,7 @@ DELIMITERS = set(['.', ',', '(', ')', ';', '[', ']', '{', '}'])
 LOGICAL_OPERATORS = set(['&', '|', '!'])
 ARITHMETIC_OPERATORS = set(['+','-','*','/'])
 DIGITS = set(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'])
+RELATIONAL_OPERATORS = set(['=', '>', '<'])
 
 RE_LETTER = re.compile(r'[a-zA-Z]')
 RE_LETTER_DIGIT_UNDERSCORE = re.compile(r'[a-zA-Z0-9_]')
@@ -195,8 +196,18 @@ class LexicalAnalyser:
     self.tokens.append(token)
     return
 
-      
-      
+  def __relational_operator__(self, char):
+    self.__next_column__()
+    next_char = self.__get_char__()
+    if(next_char == '='):
+      operator = char+next_char
+      self.__next_column__()
+    else:
+      operator = char
+    token = Token(self.line_index+1, "REL", operator)
+    self.tokens.append(token)
+
+
   def analyse(self):
     while (self.line_index < len(self.source_code)):
       while (self.column_index < len(self.source_code[self.line_index])):
@@ -228,6 +239,8 @@ class LexicalAnalyser:
           self.__delimiter__(char)
         elif(char in LOGICAL_OPERATORS):
           self.__logical_operator__(char)
+        elif(char in RELATIONAL_OPERATORS):
+          self.__relational_operator__(char)
         elif(char in DIGITS):
           self.__number__(char)
         else:
