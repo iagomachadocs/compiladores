@@ -67,7 +67,7 @@ class LexicalAnalyser:
   
   def __string__(self):
     string_line = self.line_index+1
-    string = self.__get_char__()
+    string = '\"'
     self.__next_column__()
     while (self.column_index < len(self.source_code[self.line_index])):
       char = self.__get_char__()
@@ -151,8 +151,7 @@ class LexicalAnalyser:
       self.tokens.append(token)
       self.__next_column__()
 
-  def __delimiter__(self):
-    char = self.__get_char__()
+  def __delimiter__(self, char):
     token = Token(self.line_index+1, "DEL", char)
     self.tokens.append(token)
     self.__next_column__()
@@ -226,7 +225,7 @@ class LexicalAnalyser:
         elif(char == '\"'):
           self.__string__()
         elif(char in DELIMITERS):
-          self.__delimiter__()
+          self.__delimiter__(char)
         elif(char in LOGICAL_OPERATORS):
           self.__logical_operator__(char)
         elif(char in DIGITS):
