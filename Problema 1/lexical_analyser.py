@@ -207,17 +207,16 @@ class LexicalAnalyser:
         elif(char == '/'):
           if(self.__has_next_column__()):
             self.__next_column__()
-            char = self.__get_char__()
-            if(char == '/'):
+            next_char = self.__get_char__()
+            if(next_char == '/'):
               self.__next_line__() # Comentário de linha
-            elif(char == '*'):
+            elif(next_char == '*'):
               closed = self.__multiline_comment__() # Comentário de bloco
               if(not closed):
                 return
             else:
               token = Token(self.line_index+1, "ART", char)
               self.tokens.append(token)
-              self.__next_column__()
           else:
             token = Token(self.line_index+1, "ART", char)
             self.tokens.append(token)
