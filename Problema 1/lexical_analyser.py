@@ -269,8 +269,20 @@ class LexicalAnalyser:
 
   def write_errors(self, output):
     output.write('\n')
-    for error in self.errors:
-      output.write(error.__str__()+'\n')
+    if(self.errors):
+      for error in self.errors:
+        output.write(error.__str__()+'\n')
+      output.write('----------------------------\n')
+      if(len(self.errors) == 1):
+        output.write('1 lexical error found.')
+        print('➔ 1 lexical error found.')
+      else:
+        output.write(str(len(self.errors))+' lexical errors found.')
+        print('➔ '+str(len(self.errors))+' lexical errors found.')
+    else:
+      output.write('----------------------------\n')
+      output.write('Successful lexical analysis!\nNo errors found.')
+      print('➔ Successful lexical analysis! No errors found.') 
 
   def __next_line__(self):
     self.line_index += 1
