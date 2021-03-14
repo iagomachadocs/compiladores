@@ -11,12 +11,11 @@ LOGICAL_OPERATORS = set(['&', '|', '!'])
 ARITHMETIC_OPERATORS = set(['+','-','*','/'])
 DIGITS = set(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'])
 RELATIONAL_OPERATORS = set(['=', '>', '<'])
+IGNORE = set([' ', '\n', '\t'])
 
 RE_LETTER = re.compile(r'[a-zA-Z]')
 RE_LETTER_DIGIT_UNDERSCORE = re.compile(r'[a-zA-Z0-9_]')
 RE_SIMBOL = re.compile(r'[\x20|\x21|\x23-\x7E]')
-
-
 
 class LexicalAnalyser:
 
@@ -212,8 +211,10 @@ class LexicalAnalyser:
     while (self.line_index < len(self.source_code)):
       while (self.column_index < len(self.source_code[self.line_index])):
         char = self.__get_char__()
-        if(RE_LETTER.match(char)):
-          self.__identifier_or_reserved_word__()
+        if(char in IGNORE):
+          self.__next_column__()
+        elif(char in DELIMITERS):
+          self.__delimiter__(char)
         elif(char == '/'):
           if(self.__has_next_column__()):
             self.__next_column__()
@@ -231,19 +232,21 @@ class LexicalAnalyser:
             token = Token(self.line_index+1, "ART", char)
             self.tokens.append(token)
             self.__next_column__()
+        elif(char in DIGITS):
+          self.__number__(char)
         elif(char in ARITHMETIC_OPERATORS):
           self.__arithmetic_operator__(char)
-        elif(char == '\"'):
-          self.__string__()
-        elif(char in DELIMITERS):
-          self.__delimiter__(char)
         elif(char in LOGICAL_OPERATORS):
           self.__logical_operator__(char)
         elif(char in RELATIONAL_OPERATORS):
           self.__relational_operator__(char)
-        elif(char in DIGITS):
-          self.__number__(char)
+        elif(char == '\"'):
+          self.__string__()
+        elif(RE_LETTER.match(char)):
+          self.__identifier_or_reserved_word__()
         else:
+          error = Token(self.line_index+1, "SIB", char)
+          self.errors.append(error)
           self.__next_column__()
       self.__next_line__()
   
