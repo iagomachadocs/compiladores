@@ -87,9 +87,6 @@ class LexicalAnalyser:
             string += char
             self.__next_column__()
             invalid_string = True
-      elif(RE_SIMBOL.match(char)):
-        string += char
-        self.__next_column__()
       elif(char == '\"'):
         string += char
         if(invalid_string):
@@ -103,6 +100,9 @@ class LexicalAnalyser:
       elif(char == '\n'):
         self.__next_column__()
         invalid_string = True
+      elif(RE_SIMBOL.match(char)):
+        string += char
+        self.__next_column__()
       else:
         string += char
         self.__next_column__()
