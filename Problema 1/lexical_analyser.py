@@ -69,6 +69,7 @@ class LexicalAnalyser:
     string_line = self.line_index+1
     string = '\"'
     self.__next_column__()
+    invalid_string = False
     while (self.column_index < len(self.source_code[self.line_index])):
       char = self.__get_char__()
       if(char == '\\'):
@@ -79,23 +80,35 @@ class LexicalAnalyser:
           if(RE_SIMBOL.match(char) or char == '\"'):
             string += char
             self.__next_column__()
+          elif(char == '\n'):
+            self.__next_column__()
+            invalid_string = True
           else:
-            error = Token(string_line, "CMF", string)
-            self.errors.append(error)
-            return
+            string += char
+            self.__next_column__()
+            invalid_string = True
       elif(RE_SIMBOL.match(char)):
         string += char
         self.__next_column__()
       elif(char == '\"'):
         string += char
-        token = Token(string_line, "CAD", string)
-        self.tokens.append(token)
+        if(invalid_string):
+          error = Token(string_line, "CMF", string)
+          self.errors.append(error)
+        else:
+          token = Token(string_line, "CAD", string)
+          self.tokens.append(token)
         self.__next_column__()
         return
+      elif(char == '\n'):
+        self.__next_column__()
+        invalid_string = True
       else:
-        error = Token(string_line, "CMF", string)
-        self.errors.append(error)
-        return
+        string += char
+        self.__next_column__()
+        invalid_string = True
+    error = Token(string_line, "CMF", string)
+    self.errors.append(error)
 
   def __logical_operator__(self, char):
     operator = char
@@ -255,6 +268,7 @@ class LexicalAnalyser:
       output.write(token.__str__()+'\n')
 
   def write_errors(self, output):
+    output.write('\n')
     for error in self.errors:
       output.write(error.__str__()+'\n')
 
