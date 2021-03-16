@@ -1,3 +1,8 @@
+"""
+ Código de um analisador léxico, desenvolvido como solução do Problema 1
+ do MI-Processadores de Linguagem de Programação.
+ Autor: Iago Machado da Conceição Silva
+"""
 import re
 from token import Token
 
@@ -333,14 +338,14 @@ class LexicalAnalyser:
       output.write('----------------------------\n')
       if(len(self.errors) == 1):
         output.write('1 lexical error found.')
-        print('➔ 1 lexical error found.')
+        print('-> 1 lexical error found.')
       else:
         output.write(str(len(self.errors))+' lexical errors found.')
-        print('➔ '+str(len(self.errors))+' lexical errors found.')
+        print('-> '+str(len(self.errors))+' lexical errors found.')
     else:
       output.write('----------------------------\n')
       output.write('Successful lexical analysis!\nNo errors found.')
-      print('➔ Successful lexical analysis! No errors found.') 
+      print('-> Successful lexical analysis! No errors found.') 
 
   """
   Avança para a próxima linha do arquivo.

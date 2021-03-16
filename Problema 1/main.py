@@ -1,3 +1,8 @@
+"""
+ Código de um analisador léxico, desenvolvido como solução do Problema 1
+ do MI-Processadores de Linguagem de Programação.
+ Autor: Iago Machado da Conceição Silva
+"""
 from os import listdir, path, mkdir, remove
 import re
 from lexical_analyser import LexicalAnalyser
