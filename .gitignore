@@ -129,5 +129,5 @@ dmypy.json
 .pyre/
 
 # Test files
-Problema 1/input
-Problema 1/output
+Problema 1/input/*
+Problema 1/output/*
