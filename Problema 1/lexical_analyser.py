@@ -175,6 +175,8 @@ class LexicalAnalyser:
         if(char == '+'):
           operator = '++'
           self.__next_column__()
+      else:
+        self.__next_column__()
       token = Token(self.line_index+1, "ART", operator)
       self.tokens.append(token)
     elif(char == '-'):
@@ -185,6 +187,8 @@ class LexicalAnalyser:
         if(char == '-'):
           operator = '--'
           self.__next_column__()
+      else:
+        self.__next_column__()
       token = Token(self.line_index+1, "ART", operator)
       self.tokens.append(token)
     else:

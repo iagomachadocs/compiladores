@@ -7,4 +7,4 @@ string msg = "teste
 if ( f >= -10) && (f < ) 
 	write("mensagem );
 @
-"\
+-
