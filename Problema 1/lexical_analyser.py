@@ -102,6 +102,11 @@ class LexicalAnalyser:
             string += char
             self.__next_column__()
             invalid_string = True
+        else:
+          error = Token(string_line, "CMF", string)
+          self.errors.append(error)
+          self.__next_column__()
+          return
       elif(char == '\"'):
         string += char
         if(invalid_string):

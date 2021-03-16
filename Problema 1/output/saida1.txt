@@ -28,8 +28,6 @@
 5 CMF "teste
 8 CMF "mensagem );
 9 SIB @
-10 CoMF /* exa869 mi processadores de 
-	linguagem de programacao
-	
+10 CMF "\
 ----------------------------
 4 lexical errors found.
