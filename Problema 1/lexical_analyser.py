@@ -288,7 +288,7 @@ class LexicalAnalyser:
             self.__next_column__()
             next_char = self.__get_char__()
             if(next_char == '/'):
-              self.__next_line__() # Comentário de linha
+              break # Comentário de linha
             elif(next_char == '*'):
               closed = self.__multiline_comment__() # Comentário de bloco
               if(not closed):
