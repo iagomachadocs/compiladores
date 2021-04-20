@@ -24,9 +24,9 @@ else:  # Remove todos os arquivos que estiverem na pasta de saída
             remove(path.join('output', f))
 
 for filePath in files:
-    inputFile = open(filePath, encoding='utf-8')
+    inputFile = open(filePath, 'r', encoding='ISO-8859-1')
     number = re.search(r'\d+', filePath)[0]
-    outputFile = open('output/saida'+number+'.txt', 'w', encoding='utf-8')
+    outputFile = open('output/saida'+number+'.txt', 'w', encoding='ISO-8859-1')
     source_code = inputFile.readlines()
     lexical_analyser = LexicalAnalyser(source_code)
     print('--------------------------------------------------')
