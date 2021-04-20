@@ -317,6 +317,7 @@ class LexicalAnalyser:
           self.errors.append(error)
           self.__next_column__()
       self.__next_line__()
+    return self.tokens
   
   """
   Função para escrever os tokens identificados durante análise léxica
