@@ -35,14 +35,14 @@ class LexicalAnalyser:
   Função para identificar identificadores ou palavras reservadas.
   Padrão: letra( letra | dígito| _ )*
   """
-  def __identifier_or_reserved_word__(self):
+  def __identifier_or_reserved_word(self):
     lexeme = ''
     line = self.source_code[self.line_index]
     while (self.column_index < len(line)):
       char = line[self.column_index]
       if(RE_LETTER_DIGIT_UNDERSCORE.match(char)):
         lexeme += char
-        self.__next_column__()
+        self.__next_column()
       else:
         if lexeme in RESERVED_WORDS:
           token = Token(self.line_index+1, "PRE", lexeme)
@@ -56,23 +56,23 @@ class LexicalAnalyser:
   Padrão: /* comentário */
   Caso o comentário não seja fechado é gerado um erro de comentário mal formado.
   """
-  def __multiline_comment__(self):
+  def __multiline_comment(self):
     comment_line = self.line_index+1
     comment = '/*'
-    self.__next_column__()
+    self.__next_column()
     while (self.line_index < len(self.source_code)):
       while (self.column_index < len(self.source_code[self.line_index])):
-        char = self.__get_char__()
+        char = self.__get_char()
         comment += char
-        if(char == '*' and self.__has_next_column__()):
-          self.__next_column__()
-          char = self.__get_char__()
+        if(char == '*' and self.__has_next_column()):
+          self.__next_column()
+          char = self.__get_char()
           if(char == '/'):
-            self.__next_column__()
+            self.__next_column()
             return True
         else:
-          self.__next_column__()
-      self.__next_line__()
+          self.__next_column()
+      self.__next_line()
       comment += '\t'
     
     error = Token(comment_line, "CoMF", comment)
@@ -85,32 +85,32 @@ class LexicalAnalyser:
   Caso a cadeia não seja fechada até o fim da linha ou caso haja caracteres inválidos
   dentro da cadeia é gerado um erro de cadeia mal formada.
   """
-  def __string__(self):
+  def __string(self):
     string_line = self.line_index+1
     string = '\"'
-    self.__next_column__()
+    self.__next_column()
     invalid_string = False
     while (self.column_index < len(self.source_code[self.line_index])):
-      char = self.__get_char__()
+      char = self.__get_char()
       if(char == '\\'):
         string += char
-        if(self.__has_next_column__()):
-          self.__next_column__()
-          char = self.__get_char__()
+        if(self.__has_next_column()):
+          self.__next_column()
+          char = self.__get_char()
           if(RE_SIMBOL.match(char) or char == '\"'):
             string += char
-            self.__next_column__()
+            self.__next_column()
           elif(char == '\n'):
-            self.__next_column__()
+            self.__next_column()
             invalid_string = True
           else:
             string += char
-            self.__next_column__()
+            self.__next_column()
             invalid_string = True
         else:
           error = Token(string_line, "CMF", string)
           self.errors.append(error)
-          self.__next_column__()
+          self.__next_column()
           return
       elif(char == '\"'):
         string += char
@@ -120,17 +120,17 @@ class LexicalAnalyser:
         else:
           token = Token(string_line, "CAD", string)
           self.tokens.append(token)
-        self.__next_column__()
+        self.__next_column()
         return
       elif(char == '\n'):
-        self.__next_column__()
+        self.__next_column()
         invalid_string = True
       elif(RE_SIMBOL.match(char)):
         string += char
-        self.__next_column__()
+        self.__next_column()
       else:
         string += char
-        self.__next_column__()
+        self.__next_column()
         invalid_string = True
     error = Token(string_line, "CMF", string)
     self.errors.append(error)
@@ -140,11 +140,11 @@ class LexicalAnalyser:
   Padrão: && || !
   Caso seja encontrado apenas um & ou | é gerado erro de operador mal formado.
   """
-  def __logical_operator__(self, char):
+  def __logical_operator(self, char):
     operator = char
-    if(self.__has_next_column__()):
-      self.__next_column__()
-      next_char = self.__get_char__()
+    if(self.__has_next_column()):
+      self.__next_column()
+      next_char = self.__get_char()
       if(char == '!'):
         if(next_char != '='):
           token = Token(self.line_index+1, "LOG", operator)
@@ -153,63 +153,63 @@ class LexicalAnalyser:
           operator += next_char
           token = Token(self.line_index+1, "REL", operator)
           self.tokens.append(token)
-          self.__next_column__()
+          self.__next_column()
       elif(char == next_char):
         operator += next_char
         token = Token(self.line_index+1, "LOG", operator)
         self.tokens.append(token)
-        self.__next_column__()
+        self.__next_column()
       else:
         error = Token(self.line_index+1, "OpMF", operator)
         self.errors.append(error)
     else:
       token = Token(self.line_index+1, "LOG", operator)
       self.tokens.append(token)
-      self.__next_column__()
+      self.__next_column()
   
   """
   Função que identifica operadores aritméticos.
   Padrão: +  -  *  /  ++  --
   """
-  def __arithmetic_operator__(self, char):
+  def __arithmetic_operator(self, char):
     if(char == '+'):
       operator = '+'
-      if(self.__has_next_column__()):
-        self.__next_column__()
-        char = self.__get_char__()
+      if(self.__has_next_column()):
+        self.__next_column()
+        char = self.__get_char()
         if(char == '+'):
           operator = '++'
-          self.__next_column__()
+          self.__next_column()
       else:
-        self.__next_column__()
+        self.__next_column()
       token = Token(self.line_index+1, "ART", operator)
       self.tokens.append(token)
     elif(char == '-'):
       operator = '-'
-      if(self.__has_next_column__()):
-        self.__next_column__()
-        char = self.__get_char__()
+      if(self.__has_next_column()):
+        self.__next_column()
+        char = self.__get_char()
         if(char == '-'):
           operator = '--'
-          self.__next_column__()
+          self.__next_column()
       else:
-        self.__next_column__()
+        self.__next_column()
       token = Token(self.line_index+1, "ART", operator)
       self.tokens.append(token)
     else:
       operator = char
       token = Token(self.line_index+1, "ART", operator)
       self.tokens.append(token)
-      self.__next_column__()
+      self.__next_column()
 
   """
   Função que identifica delimitadores.
   Padrão: ;  , ( )  { }  [ ] .
   """
-  def __delimiter__(self, char):
+  def __delimiter(self, char):
     token = Token(self.line_index+1, "DEL", char)
     self.tokens.append(token)
-    self.__next_column__()
+    self.__next_column()
 
   """
   Função que identifica números.
@@ -217,25 +217,25 @@ class LexicalAnalyser:
   Caso haja um '.' que não seja seguido por um dígito é gerado um erro de
   número mal formado.
   """
-  def __number__(self, char):
+  def __number(self, char):
     number = char
-    self.__next_column__()
+    self.__next_column()
     while (self.column_index < len(self.source_code[self.line_index])):
-      char = self.__get_char__()
+      char = self.__get_char()
       if(char in DIGITS):
         number += char
-        self.__next_column__()
+        self.__next_column()
       elif(char == '.'):
         number += char
-        if(self.__has_next_column__()):
-          self.__next_column__()
-          char = self.__get_char__()
+        if(self.__has_next_column()):
+          self.__next_column()
+          char = self.__get_char()
           if(char in DIGITS):
             while (self.column_index < len(self.source_code[self.line_index])):
-              char = self.__get_char__()
+              char = self.__get_char()
               if(char in DIGITS):
                 number += char
-                self.__next_column__()
+                self.__next_column()
               else:
                 token = Token(self.line_index+1, "NRO", number)
                 self.tokens.append(token)
@@ -260,12 +260,12 @@ class LexicalAnalyser:
   Função que identifica operadores relacionais.
   Padrão: ==  !=  >  >=  <  <=  = 
   """
-  def __relational_operator__(self, char):
-    self.__next_column__()
-    next_char = self.__get_char__()
+  def __relational_operator(self, char):
+    self.__next_column()
+    next_char = self.__get_char()
     if(next_char == '='):
       operator = char+next_char
-      self.__next_column__()
+      self.__next_column()
     else:
       operator = char
     token = Token(self.line_index+1, "REL", operator)
@@ -278,19 +278,19 @@ class LexicalAnalyser:
   def analyse(self):
     while (self.line_index < len(self.source_code)):
       while (self.column_index < len(self.source_code[self.line_index])):
-        char = self.__get_char__()
+        char = self.__get_char()
         if(char in IGNORE):
-          self.__next_column__()
+          self.__next_column()
         elif(char in DELIMITERS):
-          self.__delimiter__(char)
+          self.__delimiter(char)
         elif(char == '/'):
-          if(self.__has_next_column__()):
-            self.__next_column__()
-            next_char = self.__get_char__()
+          if(self.__has_next_column()):
+            self.__next_column()
+            next_char = self.__get_char()
             if(next_char == '/'):
               break # Comentário de linha
             elif(next_char == '*'):
-              closed = self.__multiline_comment__() # Comentário de bloco
+              closed = self.__multiline_comment() # Comentário de bloco
               if(not closed):
                 return
             else:
@@ -299,24 +299,24 @@ class LexicalAnalyser:
           else:
             token = Token(self.line_index+1, "ART", char)
             self.tokens.append(token)
-            self.__next_column__()
+            self.__next_column()
         elif(char in DIGITS):
-          self.__number__(char)
+          self.__number(char)
         elif(char in ARITHMETIC_OPERATORS):
-          self.__arithmetic_operator__(char)
+          self.__arithmetic_operator(char)
         elif(char in LOGICAL_OPERATORS):
-          self.__logical_operator__(char)
+          self.__logical_operator(char)
         elif(char in RELATIONAL_OPERATORS):
-          self.__relational_operator__(char)
+          self.__relational_operator(char)
         elif(char == '\"'):
-          self.__string__()
+          self.__string()
         elif(RE_LETTER.match(char)):
-          self.__identifier_or_reserved_word__()
+          self.__identifier_or_reserved_word()
         else:
           error = Token(self.line_index+1, "SIB", char)
           self.errors.append(error)
-          self.__next_column__()
-      self.__next_line__()
+          self.__next_column()
+      self.__next_line()
     return self.tokens
   
   """
@@ -351,24 +351,24 @@ class LexicalAnalyser:
   """
   Avança para a próxima linha do arquivo.
   """
-  def __next_line__(self):
+  def __next_line(self):
     self.line_index += 1
     self.column_index = 0
   
   """
   Avança para o próximo caractere da linha.
   """
-  def __next_column__(self):
+  def __next_column(self):
     self.column_index += 1
 
   """
   Verifica se ainda há caracteres na linha.
   """
-  def __has_next_column__(self):
+  def __has_next_column(self):
     return self.column_index+1 < len(self.source_code[self.line_index])
 
   """
   Retorna o caractere da posição atual.
   """
-  def __get_char__(self):
+  def __get_char(self):
     return self.source_code[self.line_index][self.column_index]
