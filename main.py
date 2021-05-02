@@ -7,6 +7,7 @@ from os import listdir, path, mkdir, remove
 import re
 from lexical_analyser import LexicalAnalyser
 from token import Token
+from parser import Parser
 
 # Filtra arquivos no diretorio de entrada
 files = []
@@ -35,6 +36,8 @@ for filePath in files:
     tokens = lexical_analyser.analyse()
     lexical_analyser.write_tokens(outputFile)
     lexical_analyser.write_errors(outputFile)
+    parser = Parser(tokens)
+    parser.run()
     print("Output "+path.basename(outputFile.name)+' generated!')    
     outputFile.close()
     inputFile.close()
