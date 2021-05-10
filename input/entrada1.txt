@@ -1,0 +1,14 @@
+var {
+  int a;
+  int b;
+  real c, d = 3.3, e = 0.1;
+  int vetor[3] = {1, 2, 3};
+  int matriz[3][3][4];
+}
+
+const {
+  int a = 10, b = 2;
+  real c[2][3] = {2.55, 5.43};
+}
+
+
