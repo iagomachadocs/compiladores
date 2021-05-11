@@ -36,7 +36,6 @@ class Parser:
           elif(sinc_token == token.value):
             is_sinc = True
             return
-
         if(not is_sinc):
           self.__next_token()
           token = self.__token()
@@ -260,6 +259,153 @@ class Parser:
       if(token != None and token.value == 'const'):
         self.__next_token()
         self.__const_block()
+
+  def __param_mult_arrays(self):
+    token = self.__token()
+    if(token != None and token.value == '['):
+      self.__next_token()
+      token = self.__token()
+      if(token != None and token.key == 'NRO'):
+        self.__next_token()
+        token = self.__token()
+        if(token != None and token.value == ']'):
+          self.__next_token()
+          self.__param_mult_arrays()
+        else:
+          self.__error('\']\'', [',', ')'])
+      else:
+        self.__error('NUMBER', [',', ')'])
+
+  def __param_arrays(self):
+    token = self.__token()
+    if(token != None and token.value == '['):
+      self.__next_token()
+      token = self.__token()
+      if(token != None and token.value == ']'):
+        self.__next_token()
+        self.__param_mult_arrays()
+      else:
+        self.__error('\']\'', [',', ')'])
+
+  def __params_list(self):
+    token = self.__token()
+    if(token != None and token.value == ','):
+      self.__next_token()
+      is_type = self.__type()
+      if(is_type):
+        token = self.__token()
+        if(token != None and token.key == 'IDE'):
+          self.__next_token()
+          self.__param_arrays()
+          self.__params_list()
+        else:
+          self.__error('IDENTIFIER', [',', ')'])
+      else:
+        self.__error('\'int\', \'real\', \'boolean\', \'string\', \'struct\' or IDENTIFIER', [',', ')'])
+
+  def __params(self):
+    is_type = self.__type()
+    if(is_type):
+      token = self.__token()
+      if(token != None and token.key == 'IDE'):
+        self.__next_token()
+        self.__param_arrays()
+        self.__params_list()
+      else:
+        self.__error('IDENTIFIER', [')'])
+
+  def __func_stms(self):
+    token = self.__token()
+    if(token != None and token.value == 'if'):
+      self.__next_token()
+      token = self.__token()
+      if(token != None and token.value == '('):
+        self.__next_token()
+        self.__log_exp()
+        token = self.__token()
+        if(token != None and token.value == ')'):
+          self.__next_token()
+          token = self.__token()
+          if(token != None and token.value == 'then'):
+            self.__next_token()
+            token = self.__token()
+            if(token != None and token.value == '{'):
+              self.__next_token()
+              token = self.__token()
+              self.__func_stms()
+              token = self.__token()
+              if(token != None and token.value == '}'):
+                self.__next_token()
+                self.__else_stm()
+                self.__func_stms()
+              else:
+                self.__error('\'}\'', ['}'])
+            else:
+              self.__error('\'{\'', ['}'])
+          else:
+            self.__error('\'then\'', ['}'])
+        else:
+          self.__error('\')\'', ['}'])
+      else:
+        self.__error('\'(\'', ['}'])
+
+  def __func_block(self):
+    token = self.__token()
+    if(token != None and token.value == '{'):
+      self.__next_token()
+      token = self.__token()
+      if(token != None and token.value == 'var'):
+        self.__next_token()
+        self.__var_block()
+        self.__func_stms()
+        token = self.__token()
+        if(token != None and token.value == '}'):
+          self.__next_token()
+        else:
+          self.__error('\'}\'', ['function', 'procedure', 'struct', 'typedef', 'start'])
+    else:
+      self.__error('\'{\'', ['function', 'procedure', 'struct', 'typedef', 'start'])
+
+
+  def __func_decl(self):
+    is_type = self.__type()
+    if(is_type):
+      token = self.__token()
+      if(token != None and token.key == 'IDE'):
+        self.__next_token()
+        token = self.__token()
+        if(token != None and token.value == '('):
+          self.__next_token()
+          self.__params()
+          token = self.__token()
+          if(token != None and token.value == ')'):
+            self.__next_token()
+            self.__func_block()
+          else:
+            self.__error('\')\'', ['function', 'procedure', 'struct', 'typedef', 'start'])
+        else:
+          self.__error('\'(\'', ['function', 'procedure', 'struct', 'typedef', 'start'])
+      else:
+        self.__error('IDENTIFIER', ['function', 'procedure', 'struct', 'typedef', 'start'])
+    else:
+      self.__error('\'int\', \'real\', \'boolean\', \'string\', \'struct\' or IDENTIFIER', ['function', 'procedure', 'struct', 'typedef', 'start'])
+        
+  
+
+  def __decls(self):
+    token = self.__token()
+    if(token != None and token.value == 'function'):
+      self.__next_token()
+      self.__func_decl()
+      self.__decls()
+    elif (token != None and token.value == 'procedure'):
+      self.__next_token()
+      self.__proc_decl()
+      self.__decls()
+    elif (token != None and (token.value == 'struct' or token.value == 'typedef')):
+      self.__next_token()
+      self.__struct_block()
+      self.__decls()
 
   def run(self):
     token = self.__token()

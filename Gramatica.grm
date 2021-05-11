@@ -19,10 +19,10 @@ Comment Line  = '//'
 
     <Program>     ::= <Const Block> <Var Block> <Decls> <Start Block> <Decls>  !first = {struct, const}                 
                
-    <Start Block> ::= start '(' ')' <Func Block>                      !first = {start}
+    <Start Block> ::= start '(' ')' <Func Block>                                !first = {start}
 
     
-    <Decls>       ::= <Decl> <Decls>                                            !first = {function, procedure}
+    <Decls>       ::= <Decl> <Decls>                                            !first = {function, procedure, struct, typedef}
                     |
               
     <Decl>        ::= <Func Decl>                                               !first = {function}
@@ -174,17 +174,14 @@ Comment Line  = '//'
     <Func Stms>       ::= <Func Stm> <Func Stms>                                          !first = {if, while, '{', id, local, global, print, read, ';', return}
                         |
                    
-    <Func Stm>        ::= if '(' <Log Expr> ')' then <Func Normal Stm> <Else Stm>         !first = {if}
-                        | while '(' <Log Expr> ')' <Func Stm>                             !first = {while}
-                        | <Func Normal Stm>                                               !first = {'{', id, local, global, print, read, ';', return}
-                        
-    <Else Stm>        ::= else  <Func Normal Stm>                                                           !first = {else}
+    <Func Stm>        ::= if '(' <Log Expr> ')' then '{' <Func Stms> '}' <Else Stm>       !first = {if}
+                        | while '(' <Log Expr> ')' '{' <Func Stms> '}'                    !first = {while}
+                        | <Var Stm>                                                       !first = {id, local, global, print, read}
+                        | return <Expr> ';'                                               !first = {return}
+
+    <Else Stm>        ::= else '{' <Func Stms> '}'                                         !first = {else}
                         | 
                    
-    <Func Normal Stm> ::= '{' <Func Stms> '}'                                             !first = {'{'}
-                        | <Var Stm>                                                       !first = {id, local, global, print, read}
-                        | ';'                                                             !first = {';'}
-                        | return <Expr> ';'                                               !first = {return}
 
 !-----------------------------------------------------------------------
 !Variable Statements
