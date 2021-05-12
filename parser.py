@@ -314,40 +314,210 @@ class Parser:
       else:
         self.__error('IDENTIFIER', [')'])
 
-  def __func_stms(self):
+  def __else_stm(self):
     token = self.__token()
-    if(token != None and token.value == 'if'):
+    if(token != None and token.value == 'else'):
+      self.__next_token()
+      token = self.__token()
+      if(token != None and token.value == '{'):
+        self.__next_token()
+        self.__func_stms()
+        token = self.__token()
+        if(token != None and token.value == '}'):
+          self.__next_token()
+        else:
+          self.__error('\'}\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
+      else:
+        self.__error('\'{\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
+
+  def __if_stm(self):
+    token = self.__token()
+    if(token != None and token.value == '('):
+      self.__next_token()
+      self.__log_exp()
+      token = self.__token()
+      if(token != None and token.value == ')'):
+        self.__next_token()
+        token = self.__token()
+        if(token != None and token.value == 'then'):
+          self.__next_token()
+          token = self.__token()
+          if(token != None and token.value == '{'):
+            self.__next_token()
+            self.__func_stms()
+            token = self.__token()
+            if(token != None and token.value == '}'):
+              self.__next_token()
+              self.__else_stm()
+            else:
+              self.__error('\'}\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
+          else:
+            self.__error('\'{\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
+        else:
+          self.__error('\'then\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
+      else:
+        self.__error('\')\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
+    else:
+      self.__error('\'(\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
+
+  def __while_stm(self):
+    token = self.__token()
+    if(token != None and token.value == '('):
+      self.__next_token()
+      self.__log_exp()
+      token = self.__token()
+      if(token != None and token.value == ')'):
+        self.__next_token()
+        token = self.__token()
+        if(token != None and token.value == '{'):
+          self.__next_token()
+          self.__func_stms()
+          token = self.__token()
+          if(token != None and token.value == '}'):
+            self.__next_token()
+          else:
+            self.__error('\'}\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
+        else:
+          self.__error('\'{\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
+      else:
+        self.__error('\')\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
+    else:
+      self.__error('\'(\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
+
+  def __access(self):
+    token = self.__token()
+    if(token != None and token.value == '.'):
+      self.__next_token()
+      token = self.__token()
+      if(token != None and token.key == 'IDE'):
+        self.__next_token()
+        token = self.__token()
+        if(token != None and token.value == '['):
+          self.__next_token()
+          self.__arrays()
+      else:
+        self.__error('IDENTIFIER', ['.', '=', '++', '--'])
+    else:
+      self.__error('.', ['.', '=', '++', '--'])
+        
+  def __accesses(self):
+    token = self.__token()
+    if(token != None and token.value == '.'):
+      self.__access()
+      self.__accesses()
+
+  def __assign(self):
+    token = self.__token()
+    if(token != None and token.value == '='):
+      self.__next_token()
+      self.__exp()
+      token = self.__token()
+      if(token != None and token.value == ';'):
+        self.__next_token()
+      else:
+        self.__error(';', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
+    elif(token != None and token.value == '++'):
+      self.__next_token()
+      token = self.__token()
+      if(token != None and token.value == ';'):
+        self.__next_token()
+      else:
+        self.__error(';', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
+    elif(token != None and token.value == '--'):
+      self.__next_token()
+      token = self.__token()
+      if(token != None and token.value == ';'):
+        self.__next_token()
+      else:
+        self.__error(';', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
+    else:
+      self.__error('\'=\', \'++\' or \'--\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
+    
+  def __stm_id(self):
+    token = self.__token()
+    if(token != None and (token.value == '=' or token.value == '++' or token.value == '--')):
+      self.__assign()
+    elif(token != None and token.value == '['):
+      self.__next_token()
+      self.__arrays()
+      self.__accesses()
+      self.__assign()
+    elif(token != None and token.value == '.'):
+      self.__access()
+      self.__accesses()
+      self.__assign()
+    elif(token != None and token.value == '('):
+      self.__next_token()
+      self.__args()
+      token = self.__token()
+      if(token != None and token.value == ')'):
+        self.__next_token()
+        token = self.__token()
+        if(token != None and token.value == ';'):
+          self.__next_token()
+        else:
+          self.__error('\';\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
+      else:
+        self.__error('\')\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
+    else:
+      self.__error('\'=\', \'++\', \'--\', \'[\', \'.\' or \'(\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
+
+     
+
+  def __var_stm(self):
+    token = self.__token()
+    if(token != None and (token.value == 'local' or token.value == 'global')):
+      self.__next_token()
+      self.__access()
+      self.__accesses()
+      self.__assign()
+    elif(token != None and token.key == 'IDE'):
+      self.__next_token()
+      self.__stm_id()
+    elif(token != None and (token.value == 'print' or token.value == 'read')):
       self.__next_token()
       token = self.__token()
       if(token != None and token.value == '('):
         self.__next_token()
-        self.__log_exp()
+        self.__args()
         token = self.__token()
         if(token != None and token.value == ')'):
           self.__next_token()
           token = self.__token()
-          if(token != None and token.value == 'then'):
+          if(token != None and token.value == ';'):
             self.__next_token()
-            token = self.__token()
-            if(token != None and token.value == '{'):
-              self.__next_token()
-              token = self.__token()
-              self.__func_stms()
-              token = self.__token()
-              if(token != None and token.value == '}'):
-                self.__next_token()
-                self.__else_stm()
-                self.__func_stms()
-              else:
-                self.__error('\'}\'', ['}'])
-            else:
-              self.__error('\'{\'', ['}'])
           else:
-            self.__error('\'then\'', ['}'])
+            self.__error('\';\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
         else:
-          self.__error('\')\'', ['}'])
+          self.__error('\')\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
       else:
-        self.__error('\'(\'', ['}'])
+        self.__error('\'(\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
+    else:
+      self.__error('\'local\', \'global\', IDENTIFIER, \'print\' or \'read\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
+        
+
+  def __func_stms(self):
+    token = self.__token()
+    if(token != None and token.value == 'if'):
+      self.__next_token()
+      self.__if_stm()
+      self.__func_stms()
+    elif(token != None and token.value == 'while'):
+      self.__next_token()
+      self.__while_stm()
+      self.__func_stms()
+    elif(token != None and (token.key == 'IDE' or token.value == 'local' or token.value == 'global' or token.value == 'print' or token.value == 'read')):
+      self.__var_stm()
+      self.__func_stms()
+    elif(token != None and token.value == 'return'):
+      self.__next_token()
+      self.__exp()
+      token = self.__token()
+      if(token != None and token.value == ';'):
+        self.__next_token()
+      else:
+        self.__error('\';\'', ['}'])
+
 
   def __func_block(self):
     token = self.__token()

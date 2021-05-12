@@ -174,15 +174,17 @@ Comment Line  = '//'
     <Func Stms>       ::= <Func Stm> <Func Stms>                                          !first = {if, while, '{', id, local, global, print, read, ';', return}
                         |
                    
-    <Func Stm>        ::= if '(' <Log Expr> ')' then '{' <Func Stms> '}' <Else Stm>       !first = {if}
-                        | while '(' <Log Expr> ')' '{' <Func Stms> '}'                    !first = {while}
+    <Func Stm>        ::= <If Stm>                                                        !first = {if}
+                        | <While Stm>                                                     !first = {while}
                         | <Var Stm>                                                       !first = {id, local, global, print, read}
                         | return <Expr> ';'                                               !first = {return}
 
     <Else Stm>        ::= else '{' <Func Stms> '}'                                         !first = {else}
                         | 
                    
+    <If Stm>          ::= if '(' <Log Expr> ')' then '{' <Func Stms> '}' <Else Stm>       !first = {if}
 
+    <While Stm>       ::= while '(' <Log Expr> ')' '{' <Func Stms> '}'                    !first = {while}
 !-----------------------------------------------------------------------
 !Variable Statements
 
