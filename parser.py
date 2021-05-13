@@ -42,6 +42,20 @@ class Parser:
     else:
       print('-> Syntax error: Unexpected end of file. Expected {} but found None'.format(expected))
 
+  def __args_list(self):
+    token = self.__token()
+    if(token != None and token.value == ','):
+      self.__next_token()
+      self.__exp()
+      self.__args_list()
+
+  def __args(self):
+    token = self.__token()
+    if(token != None and (token.value in ['!', 'true', 'false', '('] or token.key in ['IDE', 'NRO', 'CAD'])):
+      self.__exp()
+      self.__args_list()
+
+
   def __id_value(self):
     token = self.__token()
     if(token != None and token.value == '('):
@@ -154,6 +168,79 @@ class Parser:
   def __exp(self):
     self.__and()
     self.__or()
+
+  def __log_value(self):
+    token = self.__token()
+    if(token != None and (token.key == 'NRO' or token.key == 'CAD' or token.value == 'true' or token.value == 'false')):
+      self.__next_token()
+    elif(token != None and (token.value == 'local' or token.value == 'global')):
+      self.__next_token()
+      self.__access()
+    elif(token != None and token.key == 'IDE'):
+      self.__next_token()
+      self.__id_value()
+    elif(token != None and token.value == '('):
+      self.__next_token()
+      self.__log_exp()
+      token = self.__token()
+      if(token != None and token.value == ')'):
+        self.__next_token()
+      else:
+        self.__error('\')\'', ['!=', '==', '&&', '||', '>', '<', '>=', '<=', ')'])
+    else:
+      self.__error('\'(\', IDENTIFIER, NUMBER, STRING, \'true\', \'false\', \'global\' or \'local\'', ['!=', '==', '&&', '||', '>', '<', '>=', '<=', ')'])
+
+  def __log_unary(self):
+    token = self.__token()
+    if(token != None and token.value == '!'):
+      self.__next_token()
+      self.__log_unary()
+    else:
+      self.__log_value()
+
+  def __log_compare_aux(self):
+    token = self.__token()
+    if(token != None and (token.value == '<' or token.value == '>' or token.value == '<=' or token.value == '>=')):
+      self.__next_token()
+      self.__log_unary()
+      self.__log_compare_aux()
+
+  def __log_compare(self):
+    self.__log_unary()
+    self.__log_compare_aux()
+
+  def __log_equate_aux(self):
+    token = self.__token()
+    if(token != None and (token.value == '==' or token.value == '!=')):
+      self.__next_token()
+      self.__log_compare()
+      self.__log_equate_aux()
+
+  def __log_equate(self):
+    self.__log_compare()
+    self.__log_equate_aux()
+
+  def __log_and_aux(self):
+    token = self.__token()
+    if(token != None and token.value == '&&'):
+      self.__next_token()
+      self.__log_equate()
+      self.__log_and_aux()
+
+  def __log_and(self):
+    self.__log_equate()
+    self.__log_and_aux()
+
+  def __log_or(self):
+    token = self.__token()
+    if(token != None and token.value == '||'):
+      self.__next_token()
+      self.__log_and()
+      self.__log_or()
+
+  def __log_exp(self):
+    self.__log_and()
+    self.__log_or()
     
   def __type(self):
     token = self.__token()
@@ -630,12 +717,12 @@ class Parser:
       if(token != None and token.value == 'var'):
         self.__next_token()
         self.__var_block()
-        self.__func_stms()
-        token = self.__token()
-        if(token != None and token.value == '}'):
-          self.__next_token()
-        else:
-          self.__error('\'}\'', ['function', 'procedure', 'struct', 'typedef', 'start'])
+      self.__func_stms()
+      token = self.__token()
+      if(token != None and token.value == '}'):
+        self.__next_token()
+      else:
+        self.__error('\'}\'', ['function', 'procedure', 'struct', 'typedef', 'start'])
     else:
       self.__error('\'{\'', ['function', 'procedure', 'struct', 'typedef', 'start'])
 

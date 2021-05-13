@@ -8,7 +8,33 @@ var {
 
 const {
   int a = 10, b = 2;
-  real c[2][3] = {2.55, 5.43};
+  real c[2] = {2.55, 5.43};
 }
+
+typedef struct {
+  int x;
+  int y;
+} ponto;
+
+function int soma(int a, int b) {
+  return a + b;
+}
+
+start(){
+  if(a[1] > b) then {
+    a = a[1] + 3*b;
+    print(soma(a, b));
+  } else {
+    read(a, b);
+  }
+
+  while(a != b) {
+    a = ponto.x;
+    print(a);
+  }
+}
+
+
+
 
 

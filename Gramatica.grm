@@ -253,27 +253,25 @@ Comment Line  = '//'
 
 !----------------------------------------------------------------------
 !Logic Expression
-    
-    <Log Expr>     ::= <Log Or>                                                           !first = {'!', num, str, log, id '('}
                 
-    <Log Or>       ::= <Log And> <Log Or_>                                                !first = {'!', num, str, log, id '('}
-    <Log Or_>      ::= '||' <Log And> <Log Or_>                                           !first = {'||'}
+    <Log Expr>       ::= <Log And> <Log Or>                                                !first = {'!', num, str, log, id '('}
+    <Log Or>      ::= '||' <Log And> <Log Or>                                           !first = {'||'}
                      | 
 
-    <Log And>      ::= <Log Equate> <Log And_>                                            !first = {'!', num, str, log, id '('}
-    <Log And_>     ::= '&&' <Log Equate> <Log And_>                                       !first = {'&&'}
+    <Log And>      ::= <Log Equate> <Log And Aux>                                            !first = {'!', num, str, log, id '('}
+    <Log And Aux>     ::= '&&' <Log Equate> <Log And Aux>                                       !first = {'&&'}
                      | 
 
-    <Log Equate>   ::= <Log Compare> <Log Equate_>                                        !first = {'!', num, str, log, id '('}
-    <Log Equate_>  ::= '==' <Log Compare> <Log Equate_>                                   !first = {'=='}
-                     | '!=' <Log Compare> <Log Equate_>                                   !first = {'!='}
+    <Log Equate>   ::= <Log Compare> <Log Equate Aux>                                        !first = {'!', num, str, log, id '('}
+    <Log Equate Aux>  ::= '==' <Log Compare> <Log Equate Aux>                                   !first = {'=='}
+                     | '!=' <Log Compare> <Log Equate Aux>                                   !first = {'!='}
                      | 
 
-    <Log Compare>  ::= <Log Unary> <Log Compare_>                                         !first = {'!', num, str, log, id '('}
-    <Log Compare_> ::= '<' <Log Unary> <Log Compare_>                                     !first = {'>'}
-                     | '>' <Log Unary> <Log Compare_>                                     !first = {'<'}
-                     | '<=' <Log Unary> <Log Compare_>                                    !first = {'<='}
-                     | '>=' <Log Unary> <Log Compare_>                                    !first = {'>='}
+    <Log Compare>  ::= <Log Unary> <Log Compare Aux>                                         !first = {'!', num, str, log, id '('}
+    <Log Compare Aux> ::= '<' <Log Unary> <Log Compare Aux>                                     !first = {'>'}
+                     | '>' <Log Unary> <Log Compare Aux>                                     !first = {'<'}
+                     | '<=' <Log Unary> <Log Compare Aux>                                    !first = {'<='}
+                     | '>=' <Log Unary> <Log Compare Aux>                                    !first = {'>='}
                      | 
 
     <Log Unary>    ::= '!' <Log Unary>                                                    !first = {'!'}
