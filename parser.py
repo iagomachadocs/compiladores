@@ -41,15 +41,120 @@ class Parser:
           token = self.__token()
     else:
       print('-> Syntax error: Unexpected end of file. Expected {} but found None'.format(expected))
-    
-  def __exp(self):
-    token = self.__token()
-    if(token != None and token.key == 'IDE'):
-      self.__next_token()
-    elif(token != None and token.key == 'NRO'):
-      self.__next_token()
-    
 
+  def __id_value(self):
+    token = self.__token()
+    if(token != None and token.value == '('):
+      self.__next_token()
+      self.__args()
+      token = self.__token()
+      if(token != None and token.value == ')'):
+        self.__next_token()
+      else:
+        self.__error('\')\'', ['*', '/', '+', '-', '>', '<', '<=', '>=', '==', '!=', '&&', '||', '}', ']', ')', ',', ';'])
+    elif(token != None and token.value == '['):
+      self.__next_token()
+      self.__arrays()
+      self.__accesses()
+
+  def __value(self):
+    token = self.__token()
+    if(token != None and token.value == '-'):
+      self.__next_token()
+      self.__value()
+    elif(token != None and (token.key == 'NRO' or token.key == 'CAD' or token.value == 'true' or token.value == 'false')):
+      self.__next_token()
+    elif(token != None and (token.value == 'local' or token.value == 'global')):
+      self.__next_token()
+      self.__access()
+    elif(token != None and token.key == 'IDE'):
+      self.__next_token()
+      self.__id_value()
+    elif(token != None and token.value == '('):
+      self.__next_token()
+      self.__exp()
+      token = self.__token()
+      if(token != None and token.value == ')'):
+        self.__next_token()
+      else:
+        self.__error('\')\'', ['*', '/', '+', '-', '>', '<', '<=', '>=', '==', '!=', '&&', '||', '}', ']', ')', ',', ';'])
+    else:
+      self.__error('\'(\', IDENTIFIER, STRING, NUMBER, \'true\', \'false\', \'global\' or \'local\'', ['*', '/', '+', '-', '>', '<', '<=', '>=', '==', '!=', '&&', '||', '}', ']', ')', ',', ';'])
+  
+  def __unary(self):
+    token = self.__token()
+    if(token != None and token.value == '!'):
+      self.__next_token()
+      self.__unary()
+    else:
+      self.__value()
+  
+  def __mult_aux(self):
+    token = self.__token()
+    if(token != None and (token.value == '*' or token.value == '/')):
+      self.__next_token()
+      self.__unary()
+      self.__mult_aux()
+
+  def __mult(self):
+    self.__unary()
+    self.__mult_aux()  
+  
+  def __add_aux(self):
+    token = self.__token()
+    if(token != None and (token.value == '+' or token.value == '-')):
+      self.__next_token()
+      self.__mult()
+      self.__add_aux()
+
+  def __add(self):
+    self.__mult()
+    self.__add_aux()
+
+  def __compare_aux(self):
+    token = self.__token()
+    if(token != None and (token.value == '<' or token.value == '>' or token.value == '<=' or token.value == '>=')):
+      self.__next_token()
+      self.__add()
+      self.__compare_aux()
+
+  def __compare(self):
+    self.__add()
+    self.__compare_aux()
+  
+  def __equate_aux(self):
+    token = self.__token()
+    if(token != None and (token.value == '==' or token.value == '!=')):
+      self.__next_token()
+      self.__compare()
+      self.__equate_aux()
+
+  def __equate(self):
+    self.__compare()
+    self.__equate_aux()
+  
+  def __and_aux(self):
+    token = self.__token()
+    if(token != None and token.value == '&&'):
+      self.__next_token()
+      self.__equate()
+      self.__and_aux()
+
+  def __and(self):
+    self.__equate()
+    self.__and_aux()
+
+  def __or(self):
+    token = self.__token()
+    if(token != None and token.value == '||'):
+      self.__next_token()
+      self.__and()
+      self.__or()  
+  
+  def __exp(self):
+    self.__and()
+    self.__or()
+    
   def __type(self):
     token = self.__token()
     if(token != None and (token.value == 'int' or token.value == 'real' or token.value == 'boolean' or token.value == 'string')):
@@ -136,7 +241,6 @@ class Parser:
           self.__next_token()
           self.__array_decl()
         elif(token != None and (token.value in ['!', 'true', 'false', '('] or token.key in ['IDE', 'NRO', 'CAD'])):
-          self.__next_token()
           self.__exp()
         else:
           self.__error('\'{\', \'!\', \'true\', \'false\', \'(\', IDENTIFIER, STRING or NUMBER', [',', ';'])
@@ -206,7 +310,6 @@ class Parser:
         self.__array_decl()
         self.__var_list()
       elif(token != None and (token.value in ['!', 'true', 'false', '('] or token.key in ['IDE', 'NRO', 'CAD'])):
-        self.__next_token()
         self.__exp()
         self.__var_list()
       else:
@@ -660,12 +763,33 @@ class Parser:
       self.__struct_block()
       self.__decls()
 
+  def __start_block(self):
+    token = self.__token()
+    if(token != None and token.value == 'start'):
+      self.__next_token()
+      token = self.__token()
+      if(token != None and token.value == '('):
+        self.__next_token()
+        token = self.__token()
+        if(token != None and token.value == ')'):
+          self.__next_token()
+          self.__func_block()
+        else:
+          self.__error('\')\'', ['function', 'procedure', 'struct', 'typedef'])
+      else:
+        self.__error('\'(\'', ['function', 'procedure', 'struct', 'typedef'])
+    else:
+      self.__error('\'start\'', ['function', 'procedure', 'struct', 'typedef'])
+        
   def run(self):
     token = self.__token()
     if(token == None):
       print('-> Sintax analysis failed. Empty file.')
     else:
       self.__global_decl()
+      self.__decls()
+      self.__start_block()
+      self.__decls()
       if(self.errors == 0):
         print('-> Successful sintax analysis! No errors found.')
       else:

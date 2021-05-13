@@ -206,36 +206,34 @@ Comment Line  = '//'
 !-----------------------------------------------------------------------
 !Expressions  
     
-    <Expr>     ::= <Or>                                                                   !first = {'!', num, str, log, id '('}
-                
-    <Or>       ::= <And> <Or_>                                                            !first = {'!', num, str, log, id '('}
-    <Or_>      ::= '||' <And> <Or_>                                                       !first = {'||'}
+    <Expr>     ::= <And> <Or>                                                            !first = {'!', num, str, log, id '('}
+    <Or>      ::= '||' <And> <Or>                                                       !first = {'||'}
                  | 
 
-    <And>      ::= <Equate> <And_>                                                        !first = {'!', num, str, log, id '('}
-    <And_>     ::= '&&' <Equate> <And_>                                                   !first = {'&&'}
+    <And>      ::= <Equate> <And Aux>                                                        !first = {'!', num, str, log, id '('}
+    <And Aux>     ::= '&&' <Equate> <And Aux>                                                   !first = {'&&'}
                  | 
 
-    <Equate>   ::= <Compare> <Equate_>                                                    !first = {'!', num, str, log, id '('}
-    <Equate_>  ::= '==' <Compare> <Equate_>                                               !first = {'=='}
-                 | '!=' <Compare> <Equate_>                                               !first = {'!='}
+    <Equate>   ::= <Compare> <Equate Aux>                                                    !first = {'!', num, str, log, id '('}
+    <Equate Aux>  ::= '==' <Compare> <Equate Aux>                                               !first = {'=='}
+                 | '!=' <Compare> <Equate Aux>                                               !first = {'!='}
                  | 
 
-    <Compare>  ::= <Add> <Compare_>                                                       !first = {'!', num, str, log, id '('}
-    <Compare_> ::= '<'  <Add> <Compare_>                                                  !first = {'>'}
-                 | '>' <Add> <Compare_>                                                   !first = {'<'}
-                 | '<=' <Add> <Compare_>                                                  !first = {'<='}
-                 | '>=' <Add> <Compare_>                                                  !first = {'>='}
+    <Compare>  ::= <Add> <Compare Aux>                                                       !first = {'!', num, str, log, id '('}
+    <Compare Aux> ::= '<'  <Add> <Compare Aux>                                                  !first = {'>'}
+                 | '>' <Add> <Compare Aux>                                                   !first = {'<'}
+                 | '<=' <Add> <Compare Aux>                                                  !first = {'<='}
+                 | '>=' <Add> <Compare Aux>                                                  !first = {'>='}
                  | 
 
-    <Add>      ::= <Mult> <Add_>                                                          !first = {'!', num, str, log, id '('}
-    <Add_>     ::= '+' <Mult> <Add_>                                                      !first = {'+'}
-                 | '-' <Mult> <Add_>                                                      !first = {'-'}
+    <Add>      ::= <Mult> <Add Aux>                                                          !first = {'!', num, str, log, id '('}
+    <Add Aux>     ::= '+' <Mult> <Add Aux>                                                      !first = {'+'}
+                 | '-' <Mult> <Add Aux>                                                      !first = {'-'}
                  | 
                    
-    <Mult>     ::= <Unary> <Mult_>                                                        !first = {'!', num, str, log, id '('}
-    <Mult_>    ::= '*' <Unary> <Mult_>                                                    !first = {'*'}
-                 | '/' <Unary> <Mult_>                                                    !first = {'/'}
+    <Mult>     ::= <Unary> <Mult Aux>                                                        !first = {'!', num, str, log, id '('}
+    <Mult Aux>    ::= '*' <Unary> <Mult Aux>                                                    !first = {'*'}
+                 | '/' <Unary> <Mult Aux>                                                    !first = {'/'}
                  | 
 
     <Unary>    ::= '!' <Unary>                                                            !first = {'!'}
