@@ -560,7 +560,91 @@ class Parser:
     else:
       self.__error('\'int\', \'real\', \'boolean\', \'string\', \'struct\' or IDENTIFIER', ['function', 'procedure', 'struct', 'typedef', 'start'])
         
+  def __proc_decl(self):
+    token = self.__token()
+    if(token != None and token.key == 'IDE'):
+      self.__next_token()
+      token = self.__token()
+      if(token != None and token.value == '('):
+        self.__next_token()
+        self.__params()
+        token = self.__token()
+        if(token != None and token.value == ')'):
+          self.__next_token()
+          self.__func_block()
+        else:
+          self.__error('\')\'', ['function', 'procedure', 'struct', 'typedef', 'start'])
+      else:
+        self.__error('\'(\'', ['function', 'procedure', 'struct', 'typedef', 'start'])
+    else:
+      self.__error('IDENTIFIER', ['function', 'procedure', 'struct', 'typedef', 'start'])
+
+  def __extends(self):
+    token = self.__token()
+    if(token != None and token.value == 'extends'):
+      self.__next_token()
+      token = self.__token()
+      if(token != None and token.value == 'struct'):
+        self.__next_token()
+        token = self.__token()
+        if(token != None and token.key == 'IDE'):
+          self.__next_token()
+        else:
+          self.__error('IDENTIFIER', ['{'])
+      else:
+        self.__error('\'struct\'', ['{'])
+    
   
+  def __struct_block(self):
+    token = self.__token()
+    if(token != None and token.value == 'struct'):
+      self.__next_token()
+      token = self.__token()
+      if(token != None and token.key == 'IDE'):
+        self.__next_token()
+        self.__extends()
+        token = self.__token()
+        if(token != None and token.value == '{'):
+          self.__next_token()
+          self.__var_decls()
+          token = self.__token()
+          if(token != None and token.value == '}'):
+            self.__next_token()
+          else:
+            self.__error('\'}\'', ['function', 'procedure', 'struct', 'typedef', 'start'])
+        else:
+          self.__error('\'{\'', ['function', 'procedure', 'struct', 'typedef', 'start'])
+      else:
+        self.__error('IDENTIFIER', ['function', 'procedure', 'struct', 'typedef', 'start'])
+    elif(token != None and token.value == 'typedef'):
+      self.__next_token()
+      token = self.__token()
+      if(token != None and token.value == 'struct'):
+        self.__next_token()
+        self.__extends()
+        token = self.__token()
+        if(token != None and token.value == '{'):
+          self.__next_token()
+          self.__var_decls()
+          token = self.__token()
+          if(token != None and token.value == '}'):
+            self.__next_token()
+            token = self.__token()
+            if(token != None and token.key == 'IDE'):
+              self.__next_token()
+              token = self.__token()
+              if(token != None and token.value == ';'):
+                self.__next_token()
+              else:
+                self.__error('\';\'', ['function', 'procedure', 'struct', 'typedef', 'start'])
+            else:
+              self.__error('IDENTIFIER', ['function', 'procedure', 'struct', 'typedef', 'start'])
+          else:
+            self.__error('\'}\'', ['function', 'procedure', 'struct', 'typedef', 'start'])
+        else:
+          self.__error('\'{\'', ['function', 'procedure', 'struct', 'typedef', 'start'])
+      else:
+        self.__error('\'struct\'', ['function', 'procedure', 'struct', 'typedef', 'start'])
 
   def __decls(self):
     token = self.__token()
@@ -573,7 +657,6 @@ class Parser:
       self.__proc_decl()
       self.__decls()
     elif (token != None and (token.value == 'struct' or token.value == 'typedef')):
-      self.__next_token()
       self.__struct_block()
       self.__decls()
 
