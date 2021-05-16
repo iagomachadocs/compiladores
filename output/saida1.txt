@@ -39,24 +39,21 @@
 6 DEL [
 6 NRO 3
 6 DEL ]
-6 DEL [
-6 NRO 4
-6 DEL ]
 6 DEL ;
 7 DEL }
 9 PRE const
 9 DEL {
 10 PRE int
-10 IDE a
+10 IDE teste1
 10 REL =
 10 NRO 10
 10 DEL ,
-10 IDE b
+10 IDE teste2
 10 REL =
 10 NRO 2
 10 DEL ;
 11 PRE real
-11 IDE c
+11 IDE constante
 11 DEL [
 11 NRO 2
 11 DEL ]
@@ -72,11 +69,9 @@
 14 PRE struct
 14 DEL {
 15 PRE int
-15 IDE x
 15 DEL ;
 16 PRE int
 16 IDE y
-16 DEL ;
 17 DEL }
 17 IDE ponto
 17 DEL ;
@@ -163,7 +158,10 @@
 33 DEL )
 33 DEL ;
 34 DEL }
-35 DEL }
+36 PRE return
+36 IDE a
+36 DEL ;
+37 DEL }
 
 ----------------------------
 Successful lexical analysis!

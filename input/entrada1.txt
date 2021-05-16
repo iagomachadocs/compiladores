@@ -3,17 +3,17 @@ var {
   int b;
   real c, d = 3.3, e = 0.1;
   int vetor[3] = {1, 2, 3};
-  int matriz[3][3][4];
+  int matriz[3][3];
 }
 
 const {
-  int a = 10, b = 2;
-  real c[2] = {2.55, 5.43};
+  int teste1 = 10, teste2 = 2;
+  real constante[2] = {2.55, 5.43};
 }
 
 typedef struct {
-  int x;
-  int y;
+  int ;
+  int y
 } ponto;
 
 function int soma(int a, int b) {
@@ -32,6 +32,8 @@ start(){
     a = ponto.x;
     print(a);
   }
+
+  return a;
 }
 
 

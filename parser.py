@@ -69,7 +69,7 @@ class Parser:
     elif(token != None and token.value == '['):
       self.__next_token()
       self.__arrays()
-      self.__accesses()
+    self.__accesses()
 
   def __value(self):
     token = self.__token()
@@ -586,9 +586,9 @@ class Parser:
           self.__next_token()
           self.__arrays()
       else:
-        self.__error('IDENTIFIER', ['.', '=', '++', '--'])
+        self.__error('IDENTIFIER', ['.', '=', '++', '--', ';'])
     else:
-      self.__error('.', ['.', '=', '++', '--'])
+      self.__error('.', ['.', '=', '++', '--', ';'])
         
   def __accesses(self):
     token = self.__token()
