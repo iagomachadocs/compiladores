@@ -344,9 +344,13 @@ class LexicalAnalyser:
         output.write(str(len(self.errors))+' lexical errors found.')
         print('-> '+str(len(self.errors))+' lexical errors found.')
     else:
-      output.write('----------------------------\n')
-      output.write('Successful lexical analysis!\nNo errors found.')
       print('-> Successful lexical analysis! No errors found.') 
+
+  """
+  Função que retorna o número de erros léxicos identificados
+  """
+  def get_errors(self):
+    return len(self.errors)
 
   """
   Avança para a próxima linha do arquivo.

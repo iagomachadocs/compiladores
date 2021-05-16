@@ -144,7 +144,7 @@ Comment Line  = '//'
 !-----------------------------------------------------------------------
 !Procedure Declaration
 
-    <Proc Decl> ::= procedure id '(' <Params> ')' <Func Block>                  !first{procedure}
+    <Proc Decl> ::= procedure id '(' <Params> ')' <Proc Block>                  !first{procedure}
 
 !-----------------------------------------------------------------------
 !Parameters
@@ -185,6 +185,26 @@ Comment Line  = '//'
     <If Stm>          ::= if '(' <Log Expr> ')' then '{' <Func Stms> '}' <Else Stm>       !first = {if}
 
     <While Stm>       ::= while '(' <Log Expr> ')' '{' <Func Stms> '}'                    !first = {while}
+
+!-----------------------------------------------------------------------
+!Procedure Block
+
+    <Proc Block>      ::= '{' <Var Block> <Proc Stms> '}'                                 !first = {'{'}
+
+    <Proc Stms>       ::= <Proc Stm> <Proc Stms>                                          !first = {if, while, '{', id, local, global, print, read, ';', return}
+                        |
+                   
+    <Proc Stm>        ::= <If Proc Stm>                                                        !first = {if}
+                        | <While Proc Stm>                                                     !first = {while}
+                        | <Var Stm>                                                       !first = {id, local, global, print, read}
+
+    <Else Proc Stm>        ::= else '{' <Proc Stms> '}'                                         !first = {else}
+                        | 
+                   
+    <If Proc Stm>          ::= if '(' <Log Expr> ')' then '{' <Proc Stms> '}' <Else Stm>       !first = {if}
+
+    <While Proc Stm>       ::= while '(' <Log Expr> ')' '{' <Proc Stms> '}'                    !first = {while}
+
 !-----------------------------------------------------------------------
 !Variable Statements
 

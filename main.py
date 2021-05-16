@@ -36,8 +36,9 @@ for filePath in files:
     tokens = lexical_analyser.analyse()
     lexical_analyser.write_tokens(outputFile)
     lexical_analyser.write_errors(outputFile)
-    parser = Parser(tokens)
-    parser.run()
+    if(lexical_analyser.get_errors() == 0):
+        parser = Parser(tokens, outputFile)
+        parser.run()
     print("Output "+path.basename(outputFile.name)+' generated!')    
     outputFile.close()
     inputFile.close()

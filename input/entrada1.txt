@@ -12,12 +12,21 @@ const {
 }
 
 typedef struct {
-  int ;
-  int y
+  int x;
+  int y;
 } ponto;
 
 function int soma(int a, int b) {
   return a + b;
+}
+
+procedure exibeSoma(int a, int b) {
+  var {
+    int ;
+  }
+
+  local soma = soma(a, b);
+  print(soma);
 }
 
 start(){
@@ -33,7 +42,7 @@ start(){
     print(a);
   }
 
-  return a;
+  exibeSoma(a, b)
 }
 
 

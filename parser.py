@@ -3,7 +3,8 @@ from token import Token
 
 class Parser:
 
-  def __init__(self, tokens):
+  def __init__(self, tokens, output):
+    self.output = output
     self.tokens = tokens
     if(len(tokens) == 0):
       self.current_token = None
@@ -26,6 +27,7 @@ class Parser:
     self.errors += 1
     token = self.__token()
     if(token != None):
+      self.output.write('{} Syntax error: expected {} but found \'{}\'\n'.format(token.line, expected, token.value))
       print('-> Syntax error - line {}: expected {} but found \'{}\''.format(token.line, expected, token.value))
       is_sinc = False
       while(not is_sinc and token != None):
@@ -40,6 +42,7 @@ class Parser:
           self.__next_token()
           token = self.__token()
     else:
+      self.output.write(' Syntax error: Unexpected end of file. Expected {} but found None\n'.format(expected))
       print('-> Syntax error: Unexpected end of file. Expected {} but found None'.format(expected))
 
   def __args_list(self):
@@ -573,6 +576,76 @@ class Parser:
         self.__error('\')\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
     else:
       self.__error('\'(\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
+  
+  def __else_proc_stm(self):
+    token = self.__token()
+    if(token != None and token.value == 'else'):
+      self.__next_token()
+      token = self.__token()
+      if(token != None and token.value == '{'):
+        self.__next_token()
+        self.__proc_stms()
+        token = self.__token()
+        if(token != None and token.value == '}'):
+          self.__next_token()
+        else:
+          self.__error('\'}\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', '}'])
+      else:
+        self.__error('\'{\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', '}'])
+
+  def __if_proc_stm(self):
+    token = self.__token()
+    if(token != None and token.value == '('):
+      self.__next_token()
+      self.__log_exp()
+      token = self.__token()
+      if(token != None and token.value == ')'):
+        self.__next_token()
+        token = self.__token()
+        if(token != None and token.value == 'then'):
+          self.__next_token()
+          token = self.__token()
+          if(token != None and token.value == '{'):
+            self.__next_token()
+            self.__proc_stms()
+            token = self.__token()
+            if(token != None and token.value == '}'):
+              self.__next_token()
+              self.__else_proc_stm()
+            else:
+              self.__error('\'}\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', '}'])
+          else:
+            self.__error('\'{\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', '}'])
+        else:
+          self.__error('\'then\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', '}'])
+      else:
+        self.__error('\')\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', '}'])
+    else:
+      self.__error('\'(\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', '}'])
+
+  def __while_proc_stm(self):
+    token = self.__token()
+    if(token != None and token.value == '('):
+      self.__next_token()
+      self.__log_exp()
+      token = self.__token()
+      if(token != None and token.value == ')'):
+        self.__next_token()
+        token = self.__token()
+        if(token != None and token.value == '{'):
+          self.__next_token()
+          self.__proc_stms()
+          token = self.__token()
+          if(token != None and token.value == '}'):
+            self.__next_token()
+          else:
+            self.__error('\'}\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', '}'])
+        else:
+          self.__error('\'{\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', '}'])
+      else:
+        self.__error('\')\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', '}'])
+    else:
+      self.__error('\'(\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', '}'])
 
   def __access(self):
     token = self.__token()
@@ -588,7 +661,7 @@ class Parser:
       else:
         self.__error('IDENTIFIER', ['.', '=', '++', '--', ';'])
     else:
-      self.__error('.', ['.', '=', '++', '--', ';'])
+      self.__error('\'.\'', ['.', '=', '++', '--', ';'])
         
   def __accesses(self):
     token = self.__token()
@@ -684,7 +757,37 @@ class Parser:
         self.__error('\'(\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
     else:
       self.__error('\'local\', \'global\', IDENTIFIER, \'print\' or \'read\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
-        
+
+  def __proc_stms(self):
+    token = self.__token()
+    if(token != None and token.value == 'if'):
+      self.__next_token()
+      self.__if_proc_stm()
+      self.__proc_stms()
+    elif(token != None and token.value == 'while'):
+      self.__next_token()
+      self.__while_proc_stm()
+      self.__proc_stms()
+    elif(token != None and (token.key == 'IDE' or token.value == 'local' or token.value == 'global' or token.value == 'print' or token.value == 'read')):
+      self.__var_stm()
+      self.__proc_stms()
+
+  def __proc_block(self):
+    token = self.__token()
+    if(token != None and token.value == '{'):
+      self.__next_token()
+      token = self.__token()
+      if(token != None and token.value == 'var'):
+        self.__next_token()
+        self.__var_block()
+      self.__proc_stms()
+      token = self.__token()
+      if(token != None and token.value == '}'):
+        self.__next_token()
+      else:
+        self.__error('\'}\'', ['function', 'procedure', 'struct', 'typedef', 'start'])
+    else:
+      self.__error('\'{\'', ['function', 'procedure', 'struct', 'typedef', 'start'])       
 
   def __func_stms(self):
     token = self.__token()
@@ -761,7 +864,7 @@ class Parser:
         token = self.__token()
         if(token != None and token.value == ')'):
           self.__next_token()
-          self.__func_block()
+          self.__proc_block()
         else:
           self.__error('\')\'', ['function', 'procedure', 'struct', 'typedef', 'start'])
       else:
@@ -860,7 +963,7 @@ class Parser:
         token = self.__token()
         if(token != None and token.value == ')'):
           self.__next_token()
-          self.__func_block()
+          self.__proc_block()
         else:
           self.__error('\')\'', ['function', 'procedure', 'struct', 'typedef'])
       else:
@@ -871,18 +974,23 @@ class Parser:
   def run(self):
     token = self.__token()
     if(token == None):
-      print('-> Sintax analysis failed. Empty file.')
+      print('-> Syntax analysis failed. Empty file.')
     else:
       self.__global_decl()
       self.__decls()
       self.__start_block()
       self.__decls()
+      self.output.write('----------------------------\n')
+      self.output.write('Successful lexical analysis! No errors found.\n')
       if(self.errors == 0):
-        print('-> Successful sintax analysis! No errors found.')
+        self.output.write('Successful syntax analysis! No errors found.\n')
+        print('-> Successful syntax analysis! No errors found.')
       else:
         if(self.errors == 1):
-          print('-> Sintax analysis failed! 1 error found.')
+          self.output.write('Syntax analysis failed! 1 error found.\n')
+          print('-> Syntax analysis failed! 1 error found.')
         else:
-          print('-> Sintax analysis failed! {} errors found.'.format(self.errors))
+          self.output.write('Syntax analysis failed! {} errors found.\n'.format(self.errors))
+          print('-> Syntax analysis failed! {} errors found.'.format(self.errors))
         
       
