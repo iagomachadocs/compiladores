@@ -100,7 +100,7 @@ Comment Line  = '//'
 
     <Array Decl>   ::= '{' <Array Def> '}'                                      !first = {'{'} 
                 
-    <Array Def>    ::= <Expr> <Array Expr>                                      !first = {'!', num, str, log, id '('}
+    <Array Def>    ::= <Expr> <Array Expr>                                      !first = {'!', num, str, log, id, '(', 'global', 'local'}
     <Array Expr>   ::= ',' <Array Def>                                          !first = {','}
                      | 
  
@@ -226,32 +226,32 @@ Comment Line  = '//'
 !-----------------------------------------------------------------------
 !Expressions  
     
-    <Expr>     ::= <And> <Or>                                                            !first = {'!', num, str, log, id '('}
+    <Expr>     ::= <And> <Or>                                                            !first = {'!', num, str, log, id, '(', 'global', 'local'}
     <Or>      ::= '||' <And> <Or>                                                       !first = {'||'}
                  | 
 
-    <And>      ::= <Equate> <And Aux>                                                        !first = {'!', num, str, log, id '('}
+    <And>      ::= <Equate> <And Aux>                                                        !first = {'!', num, str, log, id, '(', 'global', 'local'}
     <And Aux>     ::= '&&' <Equate> <And Aux>                                                   !first = {'&&'}
                  | 
 
-    <Equate>   ::= <Compare> <Equate Aux>                                                    !first = {'!', num, str, log, id '('}
+    <Equate>   ::= <Compare> <Equate Aux>                                                    !first = {'!', num, str, log, id, '(', 'global', 'local'}
     <Equate Aux>  ::= '==' <Compare> <Equate Aux>                                               !first = {'=='}
                  | '!=' <Compare> <Equate Aux>                                               !first = {'!='}
                  | 
 
-    <Compare>  ::= <Add> <Compare Aux>                                                       !first = {'!', num, str, log, id '('}
+    <Compare>  ::= <Add> <Compare Aux>                                                       !first = {'!', num, str, log, id, '(', 'global', 'local'}
     <Compare Aux> ::= '<'  <Add> <Compare Aux>                                                  !first = {'>'}
                  | '>' <Add> <Compare Aux>                                                   !first = {'<'}
                  | '<=' <Add> <Compare Aux>                                                  !first = {'<='}
                  | '>=' <Add> <Compare Aux>                                                  !first = {'>='}
                  | 
 
-    <Add>      ::= <Mult> <Add Aux>                                                          !first = {'!', num, str, log, id '('}
+    <Add>      ::= <Mult> <Add Aux>                                                          !first = {'!', num, str, log, id, '(', 'global', 'local'}
     <Add Aux>     ::= '+' <Mult> <Add Aux>                                                      !first = {'+'}
                  | '-' <Mult> <Add Aux>                                                      !first = {'-'}
                  | 
                    
-    <Mult>     ::= <Unary> <Mult Aux>                                                        !first = {'!', num, str, log, id '('}
+    <Mult>     ::= <Unary> <Mult Aux>                                                        !first = {'!', num, str, log, id, '(', 'global', 'local'}
     <Mult Aux>    ::= '*' <Unary> <Mult Aux>                                                    !first = {'*'}
                  | '/' <Unary> <Mult Aux>                                                    !first = {'/'}
                  | 
@@ -263,8 +263,8 @@ Comment Line  = '//'
                  | num                                                                    !first = {num}
                  | str                                                                    !first = {str}
                  | log                                                                    !first = {log}
-                 | local <Access>                                                         !first = {local}
-                 | global <Access>                                                        !first = {global}
+                 | local <Access> <Accesses>                                              !first = {local}
+                 | global <Access> <Accesses>                                             !first = {global}
                  | id <Id Value>                                                          !first = {id}
                  | '(' <Expr> ')'                                                         !first = {'('}
 
@@ -274,20 +274,20 @@ Comment Line  = '//'
 !----------------------------------------------------------------------
 !Logic Expression
                 
-    <Log Expr>       ::= <Log And> <Log Or>                                                !first = {'!', num, str, log, id '('}
+    <Log Expr>       ::= <Log And> <Log Or>                                                !first = {'!', num, str, log, id, '(', 'global', 'local'}
     <Log Or>      ::= '||' <Log And> <Log Or>                                           !first = {'||'}
                      | 
 
-    <Log And>      ::= <Log Equate> <Log And Aux>                                            !first = {'!', num, str, log, id '('}
+    <Log And>      ::= <Log Equate> <Log And Aux>                                            !first = {'!', num, str, log, id, '(', 'global', 'local'}
     <Log And Aux>     ::= '&&' <Log Equate> <Log And Aux>                                       !first = {'&&'}
                      | 
 
-    <Log Equate>   ::= <Log Compare> <Log Equate Aux>                                        !first = {'!', num, str, log, id '('}
+    <Log Equate>   ::= <Log Compare> <Log Equate Aux>                                        !first = {'!', num, str, log, id, '(', 'global', 'local'}
     <Log Equate Aux>  ::= '==' <Log Compare> <Log Equate Aux>                                   !first = {'=='}
                      | '!=' <Log Compare> <Log Equate Aux>                                   !first = {'!='}
                      | 
 
-    <Log Compare>  ::= <Log Unary> <Log Compare Aux>                                         !first = {'!', num, str, log, id '('}
+    <Log Compare>  ::= <Log Unary> <Log Compare Aux>                                         !first = {'!', num, str, log, id, '(', 'global', 'local'}
     <Log Compare Aux> ::= '<' <Log Unary> <Log Compare Aux>                                     !first = {'>'}
                      | '>' <Log Unary> <Log Compare Aux>                                     !first = {'<'}
                      | '<=' <Log Unary> <Log Compare Aux>                                    !first = {'<='}
@@ -300,7 +300,7 @@ Comment Line  = '//'
     <Log Value>    ::= num                                                                !first = {num}
                      | str                                                                !first = {str}
                      | log                                                                !first = {log}
-                     | local <Access>                                                     !first = {local}
-                     | global <Access>                                                    !first = {global}
+                     | local <Access> <Accesses>                                          !first = {local}
+                     | global <Access> <Accesses>                                         !first = {global}
                      | id <Id Value>                                                      !first = {id}
                      | '(' <Log Expr> ')'                                                 !first = {'('}

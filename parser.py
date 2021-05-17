@@ -54,7 +54,7 @@ class Parser:
 
   def __args(self):
     token = self.__token()
-    if(token != None and (token.value in ['!', 'true', 'false', '('] or token.key in ['IDE', 'NRO', 'CAD'])):
+    if(token != None and (token.value in ['!', 'true', 'false', '(', 'global', 'local'] or token.key in ['IDE', 'NRO', 'CAD'])):
       self.__exp()
       self.__args_list()
 
@@ -84,6 +84,7 @@ class Parser:
     elif(token != None and (token.value == 'local' or token.value == 'global')):
       self.__next_token()
       self.__access()
+      self.__accesses()
     elif(token != None and token.key == 'IDE'):
       self.__next_token()
       self.__id_value()
@@ -179,6 +180,7 @@ class Parser:
     elif(token != None and (token.value == 'local' or token.value == 'global')):
       self.__next_token()
       self.__access()
+      self.__accesses()
     elif(token != None and token.key == 'IDE'):
       self.__next_token()
       self.__id_value()
@@ -283,7 +285,7 @@ class Parser:
       
   def __array_def(self):
     token = self.__token()
-    if(token != None and (token.value in ['!', 'true', 'false', '('] or token.key in ['IDE', 'NRO', 'CAD'])):
+    if(token != None and (token.value in ['!', 'true', 'false', '(', 'global', 'local'] or token.key in ['IDE', 'NRO', 'CAD'])):
       self.__exp()
       token = self.__token()
       if(token != None and token.value == ','):
@@ -330,7 +332,7 @@ class Parser:
         if(token != None and token.value == '{'):
           self.__next_token()
           self.__array_decl()
-        elif(token != None and (token.value in ['!', 'true', 'false', '('] or token.key in ['IDE', 'NRO', 'CAD'])):
+        elif(token != None and (token.value in ['!', 'true', 'false', '(', 'global', 'local'] or token.key in ['IDE', 'NRO', 'CAD'])):
           self.__exp()
         else:
           self.__error('\'{\', \'!\', \'true\', \'false\', \'(\', IDENTIFIER, STRING or NUMBER', [',', ';'])
@@ -399,7 +401,7 @@ class Parser:
         self.__next_token()
         self.__array_decl()
         self.__var_list()
-      elif(token != None and (token.value in ['!', 'true', 'false', '('] or token.key in ['IDE', 'NRO', 'CAD'])):
+      elif(token != None and (token.value in ['!', 'true', 'false', '(', 'global', 'local'] or token.key in ['IDE', 'NRO', 'CAD'])):
         self.__exp()
         self.__var_list()
       else:
