@@ -1,5 +1,9 @@
+"""
+ Código de um analisador sintático, desenvolvido como solução do Problema 3
+ do MI-Processadores de Linguagem de Programação.
+ Autor: Iago Machado da Conceição Silva
+"""
 from token import Token
-
 
 class Parser:
 
@@ -972,16 +976,19 @@ class Parser:
         self.__error('\'(\'', ['function', 'procedure', 'struct', 'typedef'])
     else:
       self.__error('\'start\'', ['function', 'procedure', 'struct', 'typedef'])
+
+  def __program(self):
+    self.__global_decl()
+    self.__decls()
+    self.__start_block()
+    self.__decls()
         
   def run(self):
     token = self.__token()
     if(token == None):
       print('-> Syntax analysis failed. Empty file.')
     else:
-      self.__global_decl()
-      self.__decls()
-      self.__start_block()
-      self.__decls()
+      self.__program()
       self.output.write('----------------------------\n')
       self.output.write('Successful lexical analysis! No errors found.\n')
       if(self.errors == 0):
