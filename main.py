@@ -6,8 +6,8 @@
 from os import listdir, path, mkdir, remove
 import re
 from lexical_analyser import LexicalAnalyser
-from token import Token
-from parser import Parser
+from token_class import Token
+from parser_class import Parser
 
 # Filtra arquivos no diretorio de entrada
 files = []

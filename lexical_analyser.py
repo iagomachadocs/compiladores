@@ -4,7 +4,7 @@
  Autor: Iago Machado da Conceição Silva
 """
 import re
-from token import Token
+from token_class import Token
 
 RESERVED_WORDS = set(['var', 'const', 'typedef', 'struct', 'extends', 'procedure',
                  'function', 'start', 'return', 'if', 'else', 'then', 'while',

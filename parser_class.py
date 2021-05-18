@@ -3,7 +3,7 @@
  do MI-Processadores de Linguagem de Programação.
  Autor: Iago Machado da Conceição Silva
 """
-from token import Token
+from token_class import Token
 
 class Parser:
 
