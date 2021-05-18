@@ -30,7 +30,7 @@ procedure exibeSoma(int a, int b) {
      ponto x1;
    }
    while(global.vetor[0] < 30){
-     resultado = soma(global.a, local.b);
+     resultado = soma(global.a, global.b);
      print(resultado, local.x1.x, local.x1.y);
    }
 }

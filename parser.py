@@ -26,7 +26,8 @@ class Parser:
 
   def __token(self):
     return self.current_token
-  
+
+  # Função para tratamento de erro pelo método do pânico
   def __error(self, expected, sinc_tokens):
     self.errors += 1
     token = self.__token()
@@ -45,6 +46,16 @@ class Parser:
         if(not is_sinc):
           self.__next_token()
           token = self.__token()
+    else:
+      self.output.write(' Syntax error: Unexpected end of file. Expected {} but found None\n'.format(expected))
+      print('-> Syntax error: Unexpected end of file. Expected {} but found None'.format(expected))
+
+  # Função para o tratamento de erro pelo método de correção local
+  def __local_fix(self, expected):
+    token = self.__token()
+    if(token != None):
+      self.output.write('{} Syntax error: expected {} but found \'{}\'\n'.format(token.line, expected, token.value))
+      print('-> Syntax error - line {}: expected {} but found \'{}\''.format(token.line, expected, token.value))
     else:
       self.output.write(' Syntax error: Unexpected end of file. Expected {} but found None\n'.format(expected))
       print('-> Syntax error: Unexpected end of file. Expected {} but found None'.format(expected))
@@ -372,14 +383,14 @@ class Parser:
     token = self.__token()
     if(token != None and token.value == '{'):
       self.__next_token()
-      self.__const_decls()
-      token = self.__token()
-      if(token != None and token.value == '}'):
-        self.__next_token()
-      else:
-        self.__error('\'}\'', ['var', 'function', 'procedure', 'struct', 'typedef'])
     else:
-      self.__error('\'{\'', ['var', 'function', 'procedure', 'struct', 'typedef'])
+      self.__local_fix('\'{\'')
+    self.__const_decls()
+    token = self.__token()
+    if(token != None and token.value == '}'):
+      self.__next_token()
+    else:
+      self.__error('\'}\'', ['var', 'function', 'procedure', 'struct', 'typedef'])
 
   def __var(self):
     token = self.__token()
@@ -432,14 +443,14 @@ class Parser:
     token = self.__token()
     if(token.value == '{'):
       self.__next_token()
-      self.__var_decls()
-      token = self.__token()
-      if(token.value == '}'):
-        self.__next_token()
-      else:
-        self.__error('\'}\'', ['function', 'procedure', 'struct', 'typedef', 'start', 'if', 'while', 'print', 'read', 'global', 'local', 'identifier'])
     else:
-      self.__error('\'{\'', ['function', 'procedure', 'struct', 'typedef', 'start', 'if', 'while', 'print', 'read', 'global', 'local', 'identifier'])
+      self.__local_fix('\'{\'')
+    self.__var_decls()
+    token = self.__token()
+    if(token.value == '}'):
+      self.__next_token()
+    else:
+      self.__error('\'}\'', ['function', 'procedure', 'struct', 'typedef', 'start', 'if', 'while', 'print', 'read', 'global', 'local', 'identifier'])
 
 
   def __global_decl(self):
@@ -520,14 +531,14 @@ class Parser:
       token = self.__token()
       if(token != None and token.value == '{'):
         self.__next_token()
-        self.__func_stms()
-        token = self.__token()
-        if(token != None and token.value == '}'):
-          self.__next_token()
-        else:
-          self.__error('\'}\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
       else:
-        self.__error('\'{\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
+        self.__local_fix('\'{\'')
+      self.__func_stms()
+      token = self.__token()
+      if(token != None and token.value == '}'):
+        self.__next_token()
+      else:
+        self.__error('\'}\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
 
   def __if_stm(self):
     token = self.__token()
@@ -543,15 +554,15 @@ class Parser:
           token = self.__token()
           if(token != None and token.value == '{'):
             self.__next_token()
-            self.__func_stms()
-            token = self.__token()
-            if(token != None and token.value == '}'):
-              self.__next_token()
-              self.__else_stm()
-            else:
-              self.__error('\'}\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
           else:
-            self.__error('\'{\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
+            self.__local_fix('\'{\'')
+          self.__func_stms()
+          token = self.__token()
+          if(token != None and token.value == '}'):
+            self.__next_token()
+            self.__else_stm()
+          else:
+            self.__error('\'}\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
         else:
           self.__error('\'then\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
       else:
@@ -570,14 +581,14 @@ class Parser:
         token = self.__token()
         if(token != None and token.value == '{'):
           self.__next_token()
-          self.__func_stms()
-          token = self.__token()
-          if(token != None and token.value == '}'):
-            self.__next_token()
-          else:
-            self.__error('\'}\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
         else:
-          self.__error('\'{\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
+          self.__local_fix('\'{\'')
+        self.__func_stms()
+        token = self.__token()
+        if(token != None and token.value == '}'):
+          self.__next_token()
+        else:
+          self.__error('\'}\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
       else:
         self.__error('\')\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
     else:
@@ -590,14 +601,14 @@ class Parser:
       token = self.__token()
       if(token != None and token.value == '{'):
         self.__next_token()
-        self.__proc_stms()
-        token = self.__token()
-        if(token != None and token.value == '}'):
-          self.__next_token()
-        else:
-          self.__error('\'}\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', '}'])
       else:
-        self.__error('\'{\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', '}'])
+        self.__local_fix('\'{\'')
+      self.__proc_stms()
+      token = self.__token()
+      if(token != None and token.value == '}'):
+        self.__next_token()
+      else:
+        self.__error('\'}\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', '}'])
 
   def __if_proc_stm(self):
     token = self.__token()
@@ -613,15 +624,15 @@ class Parser:
           token = self.__token()
           if(token != None and token.value == '{'):
             self.__next_token()
-            self.__proc_stms()
-            token = self.__token()
-            if(token != None and token.value == '}'):
-              self.__next_token()
-              self.__else_proc_stm()
-            else:
-              self.__error('\'}\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', '}'])
           else:
-            self.__error('\'{\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', '}'])
+            self.__local_fix('\'{\'')
+          self.__proc_stms()
+          token = self.__token()
+          if(token != None and token.value == '}'):
+            self.__next_token()
+            self.__else_proc_stm()
+          else:
+            self.__error('\'}\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', '}'])
         else:
           self.__error('\'then\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', '}'])
       else:
@@ -640,14 +651,14 @@ class Parser:
         token = self.__token()
         if(token != None and token.value == '{'):
           self.__next_token()
-          self.__proc_stms()
-          token = self.__token()
-          if(token != None and token.value == '}'):
-            self.__next_token()
-          else:
-            self.__error('\'}\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', '}'])
         else:
-          self.__error('\'{\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', '}'])
+          self.__local_fix('\'{\'')
+        self.__proc_stms()
+        token = self.__token()
+        if(token != None and token.value == '}'):
+          self.__next_token()
+        else:
+          self.__error('\'}\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', '}'])
       else:
         self.__error('\')\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', '}'])
     else:
@@ -783,17 +794,17 @@ class Parser:
     if(token != None and token.value == '{'):
       self.__next_token()
       token = self.__token()
-      if(token != None and token.value == 'var'):
-        self.__next_token()
-        self.__var_block()
-      self.__proc_stms()
-      token = self.__token()
-      if(token != None and token.value == '}'):
-        self.__next_token()
-      else:
-        self.__error('\'}\'', ['function', 'procedure', 'struct', 'typedef', 'start'])
     else:
-      self.__error('\'{\'', ['function', 'procedure', 'struct', 'typedef', 'start'])       
+      self.__local_fix('\'{\'')
+    if(token != None and token.value == 'var'):
+      self.__next_token()
+      self.__var_block()
+    self.__proc_stms()
+    token = self.__token()
+    if(token != None and token.value == '}'):
+      self.__next_token()
+    else:
+      self.__error('\'}\'', ['function', 'procedure', 'struct', 'typedef', 'start'])    
 
   def __func_stms(self):
     token = self.__token()
@@ -823,17 +834,17 @@ class Parser:
     if(token != None and token.value == '{'):
       self.__next_token()
       token = self.__token()
-      if(token != None and token.value == 'var'):
-        self.__next_token()
-        self.__var_block()
-      self.__func_stms()
-      token = self.__token()
-      if(token != None and token.value == '}'):
-        self.__next_token()
-      else:
-        self.__error('\'}\'', ['function', 'procedure', 'struct', 'typedef', 'start'])
     else:
-      self.__error('\'{\'', ['function', 'procedure', 'struct', 'typedef', 'start'])
+      self.__local_fix('\'{\'')
+    if(token != None and token.value == 'var'):
+      self.__next_token()
+      self.__var_block()
+    self.__func_stms()
+    token = self.__token()
+    if(token != None and token.value == '}'):
+      self.__next_token()
+    else:
+      self.__error('\'}\'', ['function', 'procedure', 'struct', 'typedef', 'start'])
 
 
   def __func_decl(self):
@@ -905,14 +916,14 @@ class Parser:
         token = self.__token()
         if(token != None and token.value == '{'):
           self.__next_token()
-          self.__var_decls()
-          token = self.__token()
-          if(token != None and token.value == '}'):
-            self.__next_token()
-          else:
-            self.__error('\'}\'', ['function', 'procedure', 'struct', 'typedef', 'start'])
         else:
-          self.__error('\'{\'', ['function', 'procedure', 'struct', 'typedef', 'start'])
+          self.__local_fix('\'{\'')
+        self.__var_decls()
+        token = self.__token()
+        if(token != None and token.value == '}'):
+          self.__next_token()
+        else:
+          self.__error('\'}\'', ['function', 'procedure', 'struct', 'typedef', 'start'])
       else:
         self.__error('IDENTIFIER', ['function', 'procedure', 'struct', 'typedef', 'start'])
     elif(token != None and token.value == 'typedef'):
@@ -924,24 +935,24 @@ class Parser:
         token = self.__token()
         if(token != None and token.value == '{'):
           self.__next_token()
-          self.__var_decls()
+        else:
+          self.__local_fix('\'{\'')
+        self.__var_decls()
+        token = self.__token()
+        if(token != None and token.value == '}'):
+          self.__next_token()
           token = self.__token()
-          if(token != None and token.value == '}'):
+          if(token != None and token.key == 'IDE'):
             self.__next_token()
             token = self.__token()
-            if(token != None and token.key == 'IDE'):
+            if(token != None and token.value == ';'):
               self.__next_token()
-              token = self.__token()
-              if(token != None and token.value == ';'):
-                self.__next_token()
-              else:
-                self.__error('\';\'', ['function', 'procedure', 'struct', 'typedef', 'start'])
             else:
-              self.__error('IDENTIFIER', ['function', 'procedure', 'struct', 'typedef', 'start'])
+              self.__error('\';\'', ['function', 'procedure', 'struct', 'typedef', 'start'])
           else:
-            self.__error('\'}\'', ['function', 'procedure', 'struct', 'typedef', 'start'])
+            self.__error('IDENTIFIER', ['function', 'procedure', 'struct', 'typedef', 'start'])
         else:
-          self.__error('\'{\'', ['function', 'procedure', 'struct', 'typedef', 'start'])
+          self.__error('\'}\'', ['function', 'procedure', 'struct', 'typedef', 'start'])
       else:
         self.__error('\'struct\'', ['function', 'procedure', 'struct', 'typedef', 'start'])
 

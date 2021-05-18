@@ -128,7 +128,7 @@
 33 DEL .
 33 IDE a
 33 DEL ,
-33 PRE local
+33 PRE global
 33 DEL .
 33 IDE b
 33 DEL )

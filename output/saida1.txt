@@ -1,68 +1,67 @@
-1 PRE var
+1 PRE const
 1 DEL {
 2 PRE int
-2 IDE a
+2 IDE teste1
+2 REL =
+2 NRO 10
+2 DEL ,
+2 IDE teste2
+2 REL =
 2 DEL ;
-3 PRE int
-3 IDE b
+3 PRE real
+3 IDE constante
+3 DEL [
+3 NRO 2
+3 DEL ]
+3 REL =
+3 DEL {
+3 NRO 2.55
+3 DEL ,
+3 NRO 5.43
+3 DEL }
 3 DEL ;
-4 PRE real
-4 IDE c
-4 DEL ,
-4 IDE d
-4 REL =
-4 NRO 3.3
-4 DEL ,
-4 IDE e
-4 REL =
-4 NRO 0.1
-4 DEL ;
-5 PRE int
-5 IDE vetor
-5 DEL [
-5 NRO 3
-5 DEL ]
-5 REL =
-5 DEL {
-5 NRO 1
-5 DEL ,
-5 NRO 2
-5 DEL ,
-5 NRO 3
-5 DEL }
-5 DEL ;
-6 PRE int
-6 IDE matriz
-6 DEL [
-6 NRO 3
-6 DEL ]
-6 DEL [
-6 NRO 3
-6 DEL ]
-6 DEL ;
-7 DEL }
-9 PRE const
-9 DEL {
+4 DEL }
+6 PRE var
+6 DEL {
+7 PRE int
+7 IDE a
+7 DEL ;
+8 PRE int
+8 IDE b
+8 DEL ;
+9 PRE real
+9 IDE c
+9 DEL ,
+9 IDE d
+9 REL =
+9 NRO 3.3
+9 DEL ,
+9 IDE e
+9 REL =
+9 NRO 0.1
+9 DEL ;
 10 PRE int
-10 IDE teste1
+10 IDE vetor
+10 DEL [
+10 NRO 3
+10 DEL ]
 10 REL =
-10 NRO 10
+10 DEL {
+10 NRO 1
 10 DEL ,
-10 IDE teste2
-10 REL =
 10 NRO 2
+10 DEL ,
+10 NRO 3
+10 DEL }
 10 DEL ;
-11 PRE real
-11 IDE constante
+11 PRE int
+11 IDE matriz
 11 DEL [
-11 NRO 2
+11 NRO 3
 11 DEL ]
-11 REL =
-11 DEL {
-11 NRO 2.55
-11 DEL ,
-11 NRO 5.43
-11 DEL }
+11 DEL [
+11 NRO 3
+11 DEL ]
 11 DEL ;
 12 DEL }
 14 PRE typedef
@@ -128,7 +127,6 @@
 32 PRE start
 32 DEL (
 32 DEL )
-32 DEL {
 33 PRE if
 33 DEL (
 33 IDE a
@@ -148,6 +146,7 @@
 34 DEL ]
 34 ART +
 34 NRO 3
+34 ART *
 34 ART *
 34 IDE b
 34 DEL ;
@@ -199,9 +198,12 @@
 45 DEL )
 46 DEL }
 
+2 Syntax error: expected '{', '!', 'true', 'false', '(', IDENTIFIER, STRING or NUMBER but found ';'
 25 Syntax error: expected IDENTIFIER but found ';'
 28 Syntax error: expected '.' but found 'soma'
+33 Syntax error: expected '{' but found 'if'
+34 Syntax error: expected '(', IDENTIFIER, STRING, NUMBER, 'true', 'false', 'global' or 'local' but found '*'
 46 Syntax error: expected ';' but found '}'
 ----------------------------
 Successful lexical analysis! No errors found.
-Syntax analysis failed! 3 errors found.
+Syntax analysis failed! 5 errors found.

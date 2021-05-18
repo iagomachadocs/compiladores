@@ -26,19 +26,22 @@ else:  # Remove todos os arquivos que estiverem na pasta de saída
             remove(path.join('output', f))
 
 for filePath in files:
-    inputFile = open(filePath, 'r')
-    number = re.search(r'\d+', filePath)[0]
-    outputFile = open('output/saida'+number+'.txt', 'w')
-    source_code = inputFile.readlines()
-    lexical_analyser = LexicalAnalyser(source_code)
-    print('--------------------------------------------------')
-    print("Analysing "+path.basename(inputFile.name))
-    tokens = lexical_analyser.analyse()
-    lexical_analyser.write_tokens(outputFile)
-    lexical_analyser.write_errors(outputFile)
-    if(lexical_analyser.get_errors() == 0):
-        parser = Parser(tokens, outputFile)
-        parser.run()
-    print("Output "+path.basename(outputFile.name)+' generated!')    
-    outputFile.close()
-    inputFile.close()
+    try:
+        inputFile = open(filePath, 'r')
+        number = re.search(r'\d+', filePath)[0]
+        outputFile = open('output/saida'+number+'.txt', 'w')
+        source_code = inputFile.readlines()
+        lexical_analyser = LexicalAnalyser(source_code)
+        print('--------------------------------------------------')
+        print("Analysing "+path.basename(inputFile.name))
+        tokens = lexical_analyser.analyse()
+        lexical_analyser.write_tokens(outputFile)
+        lexical_analyser.write_errors(outputFile)
+        if(lexical_analyser.get_errors() == 0):
+            parser = Parser(tokens, outputFile)
+            parser.run()
+        print("Output "+path.basename(outputFile.name)+' generated!')    
+        outputFile.close()
+        inputFile.close()
+    except:
+        print('Error processing input file', filePath)
