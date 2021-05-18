@@ -1,5 +1,5 @@
 """
- Código de um analisador léxico, desenvolvido como solução do Problema 1
+ Código de um analisador sintático, desenvolvido como solução do Problema 3
  do MI-Processadores de Linguagem de Programação.
  Autor: Iago Machado da Conceição Silva
 """
