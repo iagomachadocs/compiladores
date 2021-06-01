@@ -4,6 +4,7 @@
  Autor: Iago Machado da Conceição Silva
 """
 from token_class import Token
+from semantic_analyzer import SemanticAnalyzer
 
 class Parser:
 
@@ -16,6 +17,7 @@ class Parser:
       self.current_token = tokens[0]
     self.current_index = 0
     self.errors = 0
+    self.semantic = SemanticAnalyzer(output)
 
   def __next_token(self):
     self.current_index += 1
@@ -266,16 +268,16 @@ class Parser:
     token = self.__token()
     if(token != None and (token.value == 'int' or token.value == 'real' or token.value == 'boolean' or token.value == 'string')):
       self.__next_token()
-      return True
+      return token.value
     elif(token != None and token.key == 'IDE'):
       self.__next_token()
-      return True
+      return token.value
     elif(token != None and token.value == 'struct'):
       self.__next_token()
       token = self.__token()
       if(token != None and token.key == 'IDE'):
         self.__next_token()
-        return True
+        return token.value
       else:
         self.__error('IDENTIFIER', ['identifier'])
         return True
@@ -332,14 +334,19 @@ class Parser:
     else:
       self.__error('\']\'', ['=', ',', ';', '.', '>', '<', '>=', '<=', '==', '!=', '+', '-', '*', '/', '||', '&&'])
 
-  def __const(self):
+  def __const(self, const_type):
     token = self.__token()
     if(token != None and token.key == 'IDE'):
+      identifier_attributes = {'type': const_type, 'class': 'const'}
+      identifier = token
       self.__next_token()
       token = self.__token()
       if(token != None and token.value == '['):
+        identifier_attributes['array'] = True
         self.__next_token()
         self.__arrays()
+      else:
+        identifier_attributes['array'] = False
       token = self.__token()
       if(token != None and token.value == '='):
         self.__next_token()
@@ -349,6 +356,7 @@ class Parser:
           self.__array_decl()
         elif(token != None and (token.value in ['!', 'true', 'false', '(', 'global', 'local'] or token.key in ['IDE', 'NRO', 'CAD'])):
           self.__exp()
+          self.semantic.identifier_declaration(identifier, 'global', identifier_attributes)
         else:
           self.__error('\'{\', \'!\', \'true\', \'false\', \'(\', IDENTIFIER, STRING or NUMBER', [',', ';'])
       else:
@@ -356,12 +364,12 @@ class Parser:
     else:
       self.__error('IDENTIFIER', [',', ';'])
 
-  def __const_list(self):
+  def __const_list(self, const_type):
     token = self.__token()
     if(token != None and token.value == ','):
       self.__next_token()
-      self.__const()
-      self.__const_list()
+      self.__const(const_type)
+      self.__const_list(const_type)
     elif(token != None and token.value == ';'):
       self.__next_token()
     else:
@@ -369,10 +377,10 @@ class Parser:
   
   def __const_decls(self):
     token = self.__token()
-    is_type = self.__type()
-    if(is_type):
-      self.__const()
-      self.__const_list()
+    const_type = self.__type()
+    if(const_type != False):
+      self.__const(const_type)
+      self.__const_list(const_type)
       self.__const_decls()
     elif(token != None and token.value == 'typedef'):
       self.__next_token()
@@ -1000,6 +1008,7 @@ class Parser:
       print('-> Syntax analysis failed. Empty file.')
     else:
       self.__program()
+      print(self.semantic.scopes)
       self.output.write('----------------------------\n')
       self.output.write('Successful lexical analysis! No errors found.\n')
       if(self.errors == 0):

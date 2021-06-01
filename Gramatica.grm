@@ -17,10 +17,13 @@ Comment Line  = '//'
 !-----------------------------------------------------------------------
 !Start
 
-    <Program>     ::= <Const Block> <Var Block> <Decls> <Start Block> <Decls>  !first = {struct, const}                 
+    <Program>     ::= <Global Decls> <Decls> <Start Block> <Decls>              !first = {struct, const}                 
                
     <Start Block> ::= start '(' ')' <Func Block>                                !first = {start}
 
+    <Global Decls> ::= const '{' <Const Decls> '}' <Var Block>
+                    | var '{' <Var Decls> '}' <Const Block>
+                    |
     
     <Decls>       ::= <Decl> <Decls>                                            !first = {function, procedure, struct, typedef}
                     |

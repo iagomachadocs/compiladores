@@ -22,7 +22,7 @@ RE_LETTER = re.compile(r'[a-zA-Z]') # Regex para identificar letra
 RE_LETTER_DIGIT_UNDERSCORE = re.compile(r'[a-zA-Z0-9_]') # Regex para identificar letra, dígito ou underscore
 RE_SIMBOL = re.compile(r'[\x20|\x21|\x23-\x7E]') # Regex para identificar os símbolos 32 a 126 (exceto o 34) da tabela ASCII
 
-class LexicalAnalyser:
+class LexicalAnalyzer:
 
   def __init__(self, source_code):
     self.source_code = source_code
@@ -275,7 +275,7 @@ class LexicalAnalyser:
   Função que inicia a análise lexica, percorrendo todas as linhas do arquivo
   caractere a caractere.
   """
-  def analyse(self):
+  def analyze(self):
     while (self.line_index < len(self.source_code)):
       while (self.column_index < len(self.source_code[self.line_index])):
         char = self.__get_char()

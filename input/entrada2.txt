@@ -1,56 +1,11 @@
 const {
    string teste = "uma string de teste";
-   boolean bool = true;
+   boolean bool = true, bool = false;
    int i = 0;
-}
-
-var {
-   int a, b, c = 1;
-   int x = 22;
-   real vetor[5];
-   real matriz[3][3];
-}
-
-typedef struct {
-   int x;
-   int y;
-} ponto;
-
-function int soma (int a, int b) {
-   var {
-    int aux;
-   }
-   local.aux = a + b;
-   return aux;
-}
- 
-procedure exibeSoma(int a, int b) {
-   var {
-     int resultado;
-     ponto x1;
-   }
-   while(global.vetor[0] < 30){
-     resultado = soma(global.a, global.b);
-     print(resultado, local.x1.x, local.x1.y);
-   }
+   real b = 3.42, pi = 3.14;
+   tipo c = 3;
 }
 
 start() {
-   var {
-     int valor1 = 5;
-     int valor2 = 3;
-     int resultado;
-     boolean exibir = true;
-     boolean teste = false;
-   }
-
-   if(exibir == true || !teste) then {
-     exibeSoma(valor1,valor2);
-   } else {
-     resultado = soma(valor1, valor2);
-   }
-
-   if(resultado > 10) then {
-     valor1 = valor1 + 1 - 10 * valor2/5;
-   }
+  
 }   

@@ -5,7 +5,7 @@
 """
 from os import listdir, path, mkdir, remove
 import re
-from lexical_analyser import LexicalAnalyser
+from lexical_analyzer import LexicalAnalyzer
 from token_class import Token
 from parser_class import Parser
 
@@ -31,13 +31,13 @@ for filePath in files:
         number = re.search(r'\d+', filePath)[0]
         outputFile = open('output/saida'+number+'.txt', 'w')
         source_code = inputFile.readlines()
-        lexical_analyser = LexicalAnalyser(source_code)
+        lexical_analyzer = LexicalAnalyzer(source_code)
         print('--------------------------------------------------')
-        print("Analysing "+path.basename(inputFile.name))
-        tokens = lexical_analyser.analyse()
-        lexical_analyser.write_tokens(outputFile)
-        lexical_analyser.write_errors(outputFile)
-        if(lexical_analyser.get_errors() == 0):
+        print("Analyzing "+path.basename(inputFile.name))
+        tokens = lexical_analyzer.analyze()
+        lexical_analyzer.write_tokens(outputFile)
+        lexical_analyzer.write_errors(outputFile)
+        if(lexical_analyzer.get_errors() == 0):
             parser = Parser(tokens, outputFile)
             parser.run()
         print("Output "+path.basename(outputFile.name)+' generated!')    
