@@ -400,33 +400,39 @@ class Parser:
     else:
       self.__error('\'}\'', ['var', 'function', 'procedure', 'struct', 'typedef'])
 
-  def __var(self):
+  def __var(self, scope, var_type):
     token = self.__token()
     if(token != None and token.key == 'IDE'):
+      identifier_attributes = {'type': var_type, 'class': 'var'}
+      identifier = token
       self.__next_token()
       token = self.__token()
       if(token != None and token.value == '['):
+        identifier_attributes['array'] = True
         self.__next_token()
         self.__arrays()
+      else:
+        identifier_attributes['array'] = False
+      self.semantic.identifier_declaration(identifier, scope, identifier_attributes)
     else:
       self.__error('IDENTIFIER', [',', ';', '='])
 
-  def __var_list(self):
+  def __var_list(self, scope, var_type):
     token = self.__token()
     if(token != None and token.value == ','):
       self.__next_token()
-      self.__var()
-      self.__var_list()
+      self.__var(scope, var_type)
+      self.__var_list(scope, var_type)
     elif(token != None and token.value == '='):
       self.__next_token()
       token = self.__token()
       if(token != None and token.value == '{'):
         self.__next_token()
         self.__array_decl()
-        self.__var_list()
+        self.__var_list(scope, var_type)
       elif(token != None and (token.value in ['!', 'true', 'false', '(', 'global', 'local'] or token.key in ['IDE', 'NRO', 'CAD'])):
         self.__exp()
-        self.__var_list()
+        self.__var_list(scope, var_type)
       else:
         self.__error('\'{\', \'!\', \'true\', \'false\', \'(\', IDENTIFIER, STRING or NUMBER', ['int', 'real', 'boolean', 'string', 'identifier', 'typedef', 'struct', '}'])
     elif(token != None and token.value == ';'):
@@ -435,25 +441,25 @@ class Parser:
       self.__error('\',\', \';\' or \'=\'', ['int', 'real', 'boolean', 'string', 'identifier', 'typedef', 'struct', '}'])
 
 
-  def __var_decls(self):
+  def __var_decls(self, scope):
     token = self.__token()
-    is_type = self.__type()
-    if(is_type):
-      self.__var()
-      self.__var_list()
-      self.__var_decls()
+    var_type = self.__type()
+    if(var_type != False):
+      self.__var(scope, var_type)
+      self.__var_list(scope, var_type)
+      self.__var_decls(scope)
     elif(token != None and token.value == 'typedef'):
       self.__next_token()
       self.__typedef()
       self.__var_decls()
 
-  def __var_block(self):
+  def __var_block(self, scope):
     token = self.__token()
     if(token.value == '{'):
       self.__next_token()
     else:
       self.__local_fix('\'{\'')
-    self.__var_decls()
+    self.__var_decls(scope)
     token = self.__token()
     if(token.value == '}'):
       self.__next_token()
@@ -469,7 +475,7 @@ class Parser:
       token = self.__token()
       if(token != None and token.value == 'var'):
         self.__next_token()
-        self.__var_block()
+        self.__var_block('global')
     elif (token != None and token.value == 'var'):
       self.__next_token()
       self.__var_block()
@@ -797,7 +803,7 @@ class Parser:
       self.__var_stm()
       self.__proc_stms()
 
-  def __proc_block(self):
+  def __proc_block(self, scope):
     token = self.__token()
     if(token != None and token.value == '{'):
       self.__next_token()
@@ -806,7 +812,7 @@ class Parser:
       self.__local_fix('\'{\'')
     if(token != None and token.value == 'var'):
       self.__next_token()
-      self.__var_block()
+      self.__var_block(scope)
     self.__proc_stms()
     token = self.__token()
     if(token != None and token.value == '}'):
@@ -837,7 +843,7 @@ class Parser:
         self.__error('\';\'', ['}'])
 
 
-  def __func_block(self):
+  def __func_block(self, scope):
     token = self.__token()
     if(token != None and token.value == '{'):
       self.__next_token()
@@ -846,7 +852,7 @@ class Parser:
       self.__local_fix('\'{\'')
     if(token != None and token.value == 'var'):
       self.__next_token()
-      self.__var_block()
+      self.__var_block(scope)
     self.__func_stms()
     token = self.__token()
     if(token != None and token.value == '}'):
@@ -860,6 +866,7 @@ class Parser:
     if(is_type):
       token = self.__token()
       if(token != None and token.key == 'IDE'):
+        scope = token.value
         self.__next_token()
         token = self.__token()
         if(token != None and token.value == '('):
@@ -868,7 +875,7 @@ class Parser:
           token = self.__token()
           if(token != None and token.value == ')'):
             self.__next_token()
-            self.__func_block()
+            self.__func_block(scope)
           else:
             self.__error('\')\'', ['function', 'procedure', 'struct', 'typedef', 'start'])
         else:
@@ -881,6 +888,7 @@ class Parser:
   def __proc_decl(self):
     token = self.__token()
     if(token != None and token.key == 'IDE'):
+      scope = token.value
       self.__next_token()
       token = self.__token()
       if(token != None and token.value == '('):
@@ -889,7 +897,7 @@ class Parser:
         token = self.__token()
         if(token != None and token.value == ')'):
           self.__next_token()
-          self.__proc_block()
+          self.__proc_block(scope)
         else:
           self.__error('\')\'', ['function', 'procedure', 'struct', 'typedef', 'start'])
       else:
@@ -988,7 +996,7 @@ class Parser:
         token = self.__token()
         if(token != None and token.value == ')'):
           self.__next_token()
-          self.__proc_block()
+          self.__proc_block('start')
         else:
           self.__error('\')\'', ['function', 'procedure', 'struct', 'typedef'])
       else:

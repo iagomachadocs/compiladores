@@ -45,3 +45,4 @@ for filePath in files:
         inputFile.close()
     except:
         print('Error processing input file', filePath)
+        raise

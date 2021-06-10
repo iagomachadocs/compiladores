@@ -1,9 +1,14 @@
 const {
    string teste = "uma string de teste";
-   boolean bool = true, bool = false;
+   boolean bool = true, bool2 = false;
    int i = 0;
    real b = 3.42, pi = 3.14;
    tipo c = 3;
+}
+
+var {
+   int a = 1;
+   real teste;
 }
 
 start() {
