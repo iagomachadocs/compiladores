@@ -277,18 +277,20 @@ class Parser:
       token = self.__token()
       if(token != None and token.key == 'IDE'):
         self.__next_token()
-        return token.value
+        return 'struct '+token.value
       else:
         self.__error('IDENTIFIER', ['identifier'])
-        return True
+        return False
     return False
 
-  def __typedef(self):
+  def __typedef(self, scope):
     token = self.__token()
-    is_type = self.__type()
-    if(is_type):
+    typedef_type = self.__type()
+    if(typedef_type != False):
       token = self.__token()
       if(token != None and token.key == 'IDE'):
+        typedef_token = token
+        self.semantic.type_declaration(typedef_type, typedef_token, scope)
         self.__next_token()
         token = self.__token()
         if(token != None and token.value == ';'):
@@ -384,7 +386,7 @@ class Parser:
       self.__const_decls()
     elif(token != None and token.value == 'typedef'):
       self.__next_token()
-      self.__typedef()
+      self.__typedef('global')
       self.__const_decls()
 
   def __const_block(self):
@@ -450,8 +452,8 @@ class Parser:
       self.__var_decls(scope)
     elif(token != None and token.value == 'typedef'):
       self.__next_token()
-      self.__typedef()
-      self.__var_decls()
+      self.__typedef(scope)
+      self.__var_decls(scope)
 
   def __var_block(self, scope):
     token = self.__token()

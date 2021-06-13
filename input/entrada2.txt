@@ -3,6 +3,7 @@ const {
    boolean bool = true, bool2 = false;
    int i = 0;
    real b = 3.42, pi = 3.14;
+   typedef int tipo;
    tipo c = 3;
 }
 
@@ -22,7 +23,7 @@ function real soma(real a[], real b[]) {
 }
 
 procedure multiplica(int c, int b) {
-   
+
 }
 
 start() {
