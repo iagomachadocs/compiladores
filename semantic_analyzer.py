@@ -117,3 +117,25 @@ class SemanticAnalyzer:
         self.error('duplicated identifier', token.line, token.value)
     else:
       self.error('invalid type', token.line, typedef_type)
+
+  def struct_declaration(self, token, extends=None, typedef=False):
+    identifier = 'struct '+token.value
+    if(identifier not in self.scopes['global']):
+      if(extends != None):
+        if(self.check_type(extends)):
+          self.scopes['global'][identifier] = {'class': 'struct', 'extends': extends}
+          self.scopes[identifier] = {}
+          if(typedef):
+            self.type_declaration(identifier, token, 'global')
+          return identifier
+        else:
+          self.error('invalid type', token.line, extends)
+      else:
+        self.scopes['global'][identifier] = {'class': 'struct', 'extends': extends}
+        self.scopes[identifier] = {}
+        if(typedef):
+          self.type_declaration(identifier, token, 'global')
+        return identifier  
+      
+    else:
+      self.error('duplicated identifier', token.line, identifier)

@@ -930,6 +930,7 @@ class Parser:
         token = self.__token()
         if(token != None and token.key == 'IDE'):
           self.__next_token()
+          return 'struct '+token.value
         else:
           self.__error('IDENTIFIER', ['{'])
       else:
@@ -942,14 +943,16 @@ class Parser:
       self.__next_token()
       token = self.__token()
       if(token != None and token.key == 'IDE'):
+        struct_id = token
         self.__next_token()
-        self.__extends()
+        extends = self.__extends()
+        scope = self.semantic.struct_declaration(struct_id, extends)
         token = self.__token()
         if(token != None and token.value == '{'):
           self.__next_token()
         else:
           self.__local_fix('\'{\'')
-        self.__var_decls()
+        self.__var_decls(scope)
         token = self.__token()
         if(token != None and token.value == '}'):
           self.__next_token()

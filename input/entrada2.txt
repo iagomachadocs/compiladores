@@ -12,6 +12,11 @@ var {
    real teste;
 }
 
+struct ponto {
+   real x;
+   real y; 
+}
+
 function int soma(int a[], int b) {
    var{
       int teste2;
