@@ -900,16 +900,17 @@ class Parser:
   def __proc_decl(self):
     token = self.__token()
     if(token != None and token.key == 'IDE'):
-      scope = token.value
+      proc = token
       self.__next_token()
       token = self.__token()
       if(token != None and token.value == '('):
         self.__next_token()
-        self.__params()
+        params = self.__params()
         token = self.__token()
         if(token != None and token.value == ')'):
+          name = self.semantic.procedure_declaration(proc, params)
           self.__next_token()
-          self.__proc_block(scope)
+          self.__proc_block(name)
         else:
           self.__error('\')\'', ['function', 'procedure', 'struct', 'typedef', 'start'])
       else:

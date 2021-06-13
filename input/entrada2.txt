@@ -12,10 +12,16 @@ var {
 }
 
 function int soma(int a[], int b) {
-
+   var{
+      int teste2;
+   }
 }
 
 function real soma(real a[], real b[]) {
+
+}
+
+procedure multiplica(int c, int b) {
    
 }
 

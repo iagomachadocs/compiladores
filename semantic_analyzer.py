@@ -85,4 +85,19 @@ class SemanticAnalyzer:
       self.error('duplicated function', token.line, name)
       return None
 
-
+  def procedure_declaration(self, token, params):
+    params_str = self.params_to_string(params)
+    name = token.value + params_str
+    if(name not in self.scopes['global']):
+      valid_types = self.check_params_type(params)
+      if(valid_types == True):
+        self.scopes['global'][name] = {'type': None, 'class': 'procedure'}
+        self.scopes[name] = {}
+        self.params_declaration(name, params)
+        return name
+      else:
+        self.error('invalid type', token.line, valid_types)
+        return None
+    else:
+      self.error('duplicated function', token.line, name)
+      return None
