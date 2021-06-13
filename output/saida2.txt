@@ -45,11 +45,41 @@
 11 IDE teste
 11 DEL ;
 12 DEL }
-14 PRE start
+14 PRE function
+14 PRE int
+14 IDE soma
 14 DEL (
+14 PRE int
+14 IDE a
+14 DEL [
+14 DEL ]
+14 DEL ,
+14 PRE int
+14 IDE b
 14 DEL )
 14 DEL {
 16 DEL }
+18 PRE function
+18 PRE real
+18 IDE soma
+18 DEL (
+18 PRE real
+18 IDE a
+18 DEL [
+18 DEL ]
+18 DEL ,
+18 PRE real
+18 IDE b
+18 DEL [
+18 DEL ]
+18 DEL )
+18 DEL {
+20 DEL }
+22 PRE start
+22 DEL (
+22 DEL )
+22 DEL {
+24 DEL }
 
 6 Semantic error: 'tipo' is not a valid type.
 11 Semantic error: Identifier 'teste' has already been declared.

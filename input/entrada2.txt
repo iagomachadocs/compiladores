@@ -11,6 +11,14 @@ var {
    real teste;
 }
 
+function int soma(int a[], int b) {
+
+}
+
+function real soma(real a[], real b[]) {
+   
+}
+
 start() {
   
 }   

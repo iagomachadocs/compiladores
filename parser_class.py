@@ -885,7 +885,7 @@ class Parser:
           params = self.__params()
           token = self.__token()
           if(token != None and token.value == ')'):
-            self.semantic.function_declaration(func, func_type, params)
+            name = self.semantic.function_declaration(func, func_type, params)
             self.__next_token()
             self.__func_block(name)
           else:
