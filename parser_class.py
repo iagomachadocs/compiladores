@@ -508,35 +508,46 @@ class Parser:
       if(token != None and token.value == ']'):
         self.__next_token()
         self.__param_mult_arrays()
+        return True
       else:
         self.__error('\']\'', [',', ')'])
+    return False
 
-  def __params_list(self):
+  def __params_list(self, params):
     token = self.__token()
     if(token != None and token.value == ','):
       self.__next_token()
-      is_type = self.__type()
-      if(is_type):
+      param_type = self.__type()
+      if(param_type):
         token = self.__token()
         if(token != None and token.key == 'IDE'):
+          param_name = token.value
           self.__next_token()
-          self.__param_arrays()
-          self.__params_list()
+          param_isarray = self.__param_arrays()
+          param = {'name': param_name, 'type': param_type, 'array': param_isarray}
+          params.append(param)
+          params = self.__params_list(params)
         else:
           self.__error('IDENTIFIER', [',', ')'])
       else:
         self.__error('\'int\', \'real\', \'boolean\', \'string\', \'struct\' or IDENTIFIER', [',', ')'])
+    return params
 
   def __params(self):
-    is_type = self.__type()
-    if(is_type):
+    params = []
+    param_type = self.__type()
+    if(param_type != False):
       token = self.__token()
       if(token != None and token.key == 'IDE'):
+        param_name = token.value
         self.__next_token()
-        self.__param_arrays()
-        self.__params_list()
+        param_isarray = self.__param_arrays()
+        param = {'name': param_name, 'type': param_type, 'array': param_isarray}
+        params.append(param)
+        self.__params_list(params)
       else:
         self.__error('IDENTIFIER', [')'])
+    return params
 
   def __else_stm(self):
     token = self.__token()
@@ -862,20 +873,21 @@ class Parser:
 
 
   def __func_decl(self):
-    is_type = self.__type()
-    if(is_type):
+    func_type = self.__type()
+    if(func_type):
       token = self.__token()
       if(token != None and token.key == 'IDE'):
-        scope = token.value
+        func = token
         self.__next_token()
         token = self.__token()
         if(token != None and token.value == '('):
           self.__next_token()
-          self.__params()
+          params = self.__params()
           token = self.__token()
           if(token != None and token.value == ')'):
+            self.semantic.function_declaration(func, func_type, params)
             self.__next_token()
-            self.__func_block(scope)
+            self.__func_block(name)
           else:
             self.__error('\')\'', ['function', 'procedure', 'struct', 'typedef', 'start'])
         else:

@@ -35,3 +35,40 @@ class SemanticAnalyzer:
     else:
       self.error('duplicated identifier', token.line, token.value)
 
+
+  def check_params_type(self, params):
+    for param in params:
+      valid_type = self.check_type(param['type'])
+      if(not valid_type):
+        return param['type']
+    return True
+    
+  def function_declaration(self, token, return_type, params):
+    name = token.value
+    if(name in self.scopes['global']):
+      identifier = self.scopes['global'][name]
+      if(identifier['class'] == 'function'):
+        valid_type = self.check_type(return_type)
+        if(valid_type):
+          params_type = self.check_params_type(params)
+          if(params_type == True):
+            func = {'params': params, 'type': return_type}
+            identifier['instances'].append(func)
+          else:
+            self.error('invalid type', token.line, params_type)
+        else:
+          self.error('invalid type', token.line, return_type)
+      else:
+        self.error('duplicated identifier', token.line, token.value)
+    else:
+      valid_type = self.check_type(return_type)
+      if(valid_type):
+        params_type = self.check_params_type(params)
+        if(params_type == True):
+          func = {'params': params, 'type': return_type}
+          self.scopes['global'][token.value] = { 'class': 'function', 'instances': [func]}
+        else:
+          self.error('invalid type', token.line, params_type)
+      else:
+        self.error('invalid type', token.line, return_type)
+
