@@ -10,7 +10,9 @@ class SemanticAnalyzer:
       'duplicated identifier': 'Identifier \'{}\' has already been declared.'.format(value),
       'invalid type': '\'{}\' is not a valid type.'.format(value),
       'duplicated function': 'Function \'{}\' has already been declared.'.format(value),
-      'duplicated procedure': 'Procedure \'{}\' has already been declared.'.format(value)
+      'duplicated procedure': 'Procedure \'{}\' has already been declared.'.format(value),
+      'not defined': '\'{}\' is not defined.'.format(value),
+      'array index type': 'Array index must be integer.'
     }
     self.output.write('{} Semantic error: {}\n'.format(line, messages[error]))
     print('-> Semantic error - line {}: {}'.format(line, messages[error]))
@@ -146,3 +148,33 @@ class SemanticAnalyzer:
       self.error('duplicated identifier', token.line, identifier) 
     del self.scopes['global']['struct _temp']
     del self.scopes['struct _temp']
+
+  def is_integer(self, token):
+    if(token.key == 'NRO'):
+      identifier = str(token.value)
+      if('.' not in identifier):
+        return True
+    return False
+
+  def array_index_type(self, token, scope):
+    value = token.value
+    if(value == 'IDE'):
+      if(value in self.scopes[scope]):
+        if(self.scopes[scope][value]['type'] == 'int'):
+          return True
+        else:
+          self.error('array index type', token.line, value)
+      elif(value in self.scopes['global']):
+        if(self.scopes['global'][value]['type'] == 'int'):
+          return True
+        else:
+          self.error('array index type', token.line, value)  
+      else:
+        self.error('not defined', token.line, value)
+      return False
+    elif(self.is_integer(token)):
+      return True
+    else:
+      self.error('array index type', token.line, value)
+      return False
+      

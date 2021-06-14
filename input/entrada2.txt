@@ -24,7 +24,10 @@ typedef struct extends struct ponto {
 function int soma(int a[], int b) {
    var{
       int teste2;
+      int array[3];
+      real y = 2.3;
    }
+   array[y] = 0
 }
 
 function real soma(real a[], real b[]) {

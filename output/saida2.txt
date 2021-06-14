@@ -89,42 +89,61 @@
 26 PRE int
 26 IDE teste2
 26 DEL ;
-27 DEL }
-28 DEL }
-30 PRE function
-30 PRE real
-30 IDE soma
-30 DEL (
-30 PRE real
-30 IDE a
+27 PRE int
+27 IDE array
+27 DEL [
+27 NRO 3
+27 DEL ]
+27 DEL ;
+28 PRE real
+28 IDE y
+28 REL =
+28 NRO 2.3
+28 DEL ;
+29 DEL }
+30 IDE array
 30 DEL [
+30 IDE y
 30 DEL ]
-30 DEL ,
-30 PRE real
-30 IDE b
-30 DEL [
-30 DEL ]
-30 DEL )
-30 DEL {
-32 DEL }
-34 PRE procedure
-34 IDE multiplica
-34 DEL (
-34 PRE int
-34 IDE c
-34 DEL ,
-34 PRE int
-34 IDE b
-34 DEL )
-34 DEL {
-36 DEL }
-38 PRE start
-38 DEL (
-38 DEL )
-38 DEL {
-40 DEL }
+30 REL =
+30 NRO 0
+31 DEL }
+33 PRE function
+33 PRE real
+33 IDE soma
+33 DEL (
+33 PRE real
+33 IDE a
+33 DEL [
+33 DEL ]
+33 DEL ,
+33 PRE real
+33 IDE b
+33 DEL [
+33 DEL ]
+33 DEL )
+33 DEL {
+35 DEL }
+37 PRE procedure
+37 IDE multiplica
+37 DEL (
+37 PRE int
+37 IDE c
+37 DEL ,
+37 PRE int
+37 IDE b
+37 DEL )
+37 DEL {
+39 DEL }
+41 PRE start
+41 DEL (
+41 DEL )
+41 DEL {
+43 DEL }
 
 12 Semantic error: Identifier 'teste' has already been declared.
+30 Semantic error: Array index must be integer.
+31 Syntax error: expected ; but found '}'
 ----------------------------
 Successful lexical analysis! No errors found.
-Successful syntax analysis! No errors found.
+Syntax analysis failed! 1 error found.

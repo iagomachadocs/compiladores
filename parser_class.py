@@ -62,25 +62,25 @@ class Parser:
       self.output.write(' Syntax error: Unexpected end of file. Expected {} but found None\n'.format(expected))
       print('-> Syntax error: Unexpected end of file. Expected {} but found None'.format(expected))
 
-  def __args_list(self):
+  def __args_list(self, scope):
     token = self.__token()
     if(token != None and token.value == ','):
       self.__next_token()
-      self.__exp()
-      self.__args_list()
+      self.__exp(scope)
+      self.__args_list(scope)
 
-  def __args(self):
+  def __args(self, scope):
     token = self.__token()
     if(token != None and (token.value in ['!', 'true', 'false', '(', 'global', 'local'] or token.key in ['IDE', 'NRO', 'CAD'])):
-      self.__exp()
-      self.__args_list()
+      self.__exp(scope)
+      self.__args_list(scope)
 
 
-  def __id_value(self):
+  def __id_value(self, scope):
     token = self.__token()
     if(token != None and token.value == '('):
       self.__next_token()
-      self.__args()
+      self.__args(scope)
       token = self.__token()
       if(token != None and token.value == ')'):
         self.__next_token()
@@ -88,26 +88,26 @@ class Parser:
         self.__error('\')\'', ['*', '/', '+', '-', '>', '<', '<=', '>=', '==', '!=', '&&', '||', '}', ']', ')', ',', ';'])
     elif(token != None and token.value == '['):
       self.__next_token()
-      self.__arrays()
-    self.__accesses()
+      self.__arrays(scope)
+    self.__accesses(scope)
 
-  def __value(self):
+  def __value(self, scope):
     token = self.__token()
     if(token != None and token.value == '-'):
       self.__next_token()
-      self.__value()
+      self.__value(scope)
     elif(token != None and (token.key == 'NRO' or token.key == 'CAD' or token.value == 'true' or token.value == 'false')):
       self.__next_token()
     elif(token != None and (token.value == 'local' or token.value == 'global')):
       self.__next_token()
-      self.__access()
-      self.__accesses()
+      self.__access(scope)
+      self.__accesses(scope)
     elif(token != None and token.key == 'IDE'):
       self.__next_token()
-      self.__id_value()
+      self.__id_value(scope)
     elif(token != None and token.value == '('):
       self.__next_token()
-      self.__exp()
+      self.__exp(scope)
       token = self.__token()
       if(token != None and token.value == ')'):
         self.__next_token()
@@ -116,94 +116,94 @@ class Parser:
     else:
       self.__error('\'(\', IDENTIFIER, STRING, NUMBER, \'true\', \'false\', \'global\' or \'local\'', ['*', '/', '+', '-', '>', '<', '<=', '>=', '==', '!=', '&&', '||', '}', ']', ')', ',', ';'])
   
-  def __unary(self):
+  def __unary(self, scope):
     token = self.__token()
     if(token != None and token.value == '!'):
       self.__next_token()
-      self.__unary()
+      self.__unary(scope)
     else:
-      self.__value()
+      self.__value(scope)
   
-  def __mult_aux(self):
+  def __mult_aux(self, scope):
     token = self.__token()
     if(token != None and (token.value == '*' or token.value == '/')):
       self.__next_token()
-      self.__unary()
-      self.__mult_aux()
+      self.__unary(scope)
+      self.__mult_aux(scope)
 
-  def __mult(self):
-    self.__unary()
-    self.__mult_aux()  
+  def __mult(self, scope):
+    self.__unary(scope)
+    self.__mult_aux(scope)  
   
-  def __add_aux(self):
+  def __add_aux(self, scope):
     token = self.__token()
     if(token != None and (token.value == '+' or token.value == '-')):
       self.__next_token()
-      self.__mult()
-      self.__add_aux()
+      self.__mult(scope)
+      self.__add_aux(scope)
 
-  def __add(self):
-    self.__mult()
-    self.__add_aux()
+  def __add(self, scope):
+    self.__mult(scope)
+    self.__add_aux(scope)
 
-  def __compare_aux(self):
+  def __compare_aux(self, scope):
     token = self.__token()
     if(token != None and (token.value == '<' or token.value == '>' or token.value == '<=' or token.value == '>=')):
       self.__next_token()
-      self.__add()
-      self.__compare_aux()
+      self.__add(scope)
+      self.__compare_aux(scope)
 
-  def __compare(self):
-    self.__add()
-    self.__compare_aux()
+  def __compare(self, scope):
+    self.__add(scope)
+    self.__compare_aux(scope)
   
-  def __equate_aux(self):
+  def __equate_aux(self, scope):
     token = self.__token()
     if(token != None and (token.value == '==' or token.value == '!=')):
       self.__next_token()
-      self.__compare()
-      self.__equate_aux()
+      self.__compare(scope)
+      self.__equate_aux(scope)
 
-  def __equate(self):
-    self.__compare()
-    self.__equate_aux()
+  def __equate(self, scope):
+    self.__compare(scope)
+    self.__equate_aux(scope)
   
-  def __and_aux(self):
+  def __and_aux(self, scope):
     token = self.__token()
     if(token != None and token.value == '&&'):
       self.__next_token()
-      self.__equate()
-      self.__and_aux()
+      self.__equate(scope)
+      self.__and_aux(scope)
 
-  def __and(self):
-    self.__equate()
-    self.__and_aux()
+  def __and(self, scope):
+    self.__equate(scope)
+    self.__and_aux(scope)
 
-  def __or(self):
+  def __or(self, scope):
     token = self.__token()
     if(token != None and token.value == '||'):
       self.__next_token()
-      self.__and()
-      self.__or()  
+      self.__and(scope)
+      self.__or(scope)  
   
-  def __exp(self):
-    self.__and()
-    self.__or()
+  def __exp(self, scope):
+    self.__and(scope)
+    self.__or(scope)
 
-  def __log_value(self):
+  def __log_value(self, scope):
     token = self.__token()
     if(token != None and (token.key == 'NRO' or token.key == 'CAD' or token.value == 'true' or token.value == 'false')):
       self.__next_token()
     elif(token != None and (token.value == 'local' or token.value == 'global')):
       self.__next_token()
-      self.__access()
-      self.__accesses()
+      self.__access(scope)
+      self.__accesses(scope)
     elif(token != None and token.key == 'IDE'):
       self.__next_token()
-      self.__id_value()
+      self.__id_value(scope)
     elif(token != None and token.value == '('):
       self.__next_token()
-      self.__log_exp()
+      self.__log_exp(scope)
       token = self.__token()
       if(token != None and token.value == ')'):
         self.__next_token()
@@ -212,57 +212,57 @@ class Parser:
     else:
       self.__error('\'(\', IDENTIFIER, NUMBER, STRING, \'true\', \'false\', \'global\' or \'local\'', ['!=', '==', '&&', '||', '>', '<', '>=', '<=', ')'])
 
-  def __log_unary(self):
+  def __log_unary(self, scope):
     token = self.__token()
     if(token != None and token.value == '!'):
       self.__next_token()
-      self.__log_unary()
+      self.__log_unary(scope)
     else:
-      self.__log_value()
+      self.__log_value(scope)
 
-  def __log_compare_aux(self):
+  def __log_compare_aux(self, scope):
     token = self.__token()
     if(token != None and (token.value == '<' or token.value == '>' or token.value == '<=' or token.value == '>=')):
       self.__next_token()
-      self.__log_unary()
-      self.__log_compare_aux()
+      self.__log_unary(scope)
+      self.__log_compare_aux(scope)
 
-  def __log_compare(self):
-    self.__log_unary()
-    self.__log_compare_aux()
+  def __log_compare(self, scope):
+    self.__log_unary(scope)
+    self.__log_compare_aux(scope)
 
-  def __log_equate_aux(self):
+  def __log_equate_aux(self, scope):
     token = self.__token()
     if(token != None and (token.value == '==' or token.value == '!=')):
       self.__next_token()
-      self.__log_compare()
-      self.__log_equate_aux()
+      self.__log_compare(scope)
+      self.__log_equate_aux(scope)
 
-  def __log_equate(self):
-    self.__log_compare()
-    self.__log_equate_aux()
+  def __log_equate(self, scope):
+    self.__log_compare(scope)
+    self.__log_equate_aux(scope)
 
-  def __log_and_aux(self):
+  def __log_and_aux(self, scope):
     token = self.__token()
     if(token != None and token.value == '&&'):
       self.__next_token()
-      self.__log_equate()
-      self.__log_and_aux()
+      self.__log_equate(scope)
+      self.__log_and_aux(scope)
 
-  def __log_and(self):
-    self.__log_equate()
-    self.__log_and_aux()
+  def __log_and(self, scope):
+    self.__log_equate(scope)
+    self.__log_and_aux(scope)
 
-  def __log_or(self):
+  def __log_or(self, scope):
     token = self.__token()
     if(token != None and token.value == '||'):
       self.__next_token()
-      self.__log_and()
-      self.__log_or()
+      self.__log_and(scope)
+      self.__log_or(scope)
 
-  def __log_exp(self):
-    self.__log_and()
-    self.__log_or()
+  def __log_exp(self, scope):
+    self.__log_and(scope)
+    self.__log_or(scope)
     
   def __type(self):
     token = self.__token()
@@ -302,14 +302,14 @@ class Parser:
     else:
       self.__error('\'int\', \'real\', \'boolean\', \'string\', \'struct\' or IDENTIFIER', ['}', 'int', 'real', 'boolean', 'string', 'typedef', 'struct'])
       
-  def __array_def(self):
+  def __array_def(self, scope):
     token = self.__token()
     if(token != None and (token.value in ['!', 'true', 'false', '(', 'global', 'local'] or token.key in ['IDE', 'NRO', 'CAD'])):
-      self.__exp()
+      self.__exp(scope)
       token = self.__token()
       if(token != None and token.value == ','):
         self.__next_token()
-        self.__array_def()
+        self.__array_def(scope)
     else:
       self.__error('\'!\', \'true\', \'false\', \'(\', IDENTIFIER, NUMBER or STRING', ['}'])
   
@@ -322,9 +322,10 @@ class Parser:
       self.__error('\',\' or \'}\'', [';'])
     
 
-  def __arrays(self):
+  def __arrays(self, scope):
     token = self.__token()
     if(token != None and token.key == 'NRO' or token.key == 'IDE'):
+      self.semantic.array_index_type(token, scope)
       self.__next_token()
       token = self.__token()
     if(token != None and token.value == ']'):
@@ -332,7 +333,7 @@ class Parser:
       token = self.__token()
       if(token != None and token.value == '['):
         self.__next_token()
-        self.__arrays()
+        self.__arrays(scope)
     else:
       self.__error('\']\'', ['=', ',', ';', '.', '>', '<', '>=', '<=', '==', '!=', '+', '-', '*', '/', '||', '&&'])
 
@@ -346,7 +347,7 @@ class Parser:
       if(token != None and token.value == '['):
         identifier_attributes['array'] = True
         self.__next_token()
-        self.__arrays()
+        self.__arrays('global')
       else:
         identifier_attributes['array'] = False
       token = self.__token()
@@ -357,7 +358,7 @@ class Parser:
           self.__next_token()
           self.__array_decl()
         elif(token != None and (token.value in ['!', 'true', 'false', '(', 'global', 'local'] or token.key in ['IDE', 'NRO', 'CAD'])):
-          self.__exp()
+          self.__exp('global')
           self.semantic.identifier_declaration(identifier, 'global', identifier_attributes)
         else:
           self.__error('\'{\', \'!\', \'true\', \'false\', \'(\', IDENTIFIER, STRING or NUMBER', [',', ';'])
@@ -412,7 +413,7 @@ class Parser:
       if(token != None and token.value == '['):
         identifier_attributes['array'] = True
         self.__next_token()
-        self.__arrays()
+        self.__arrays(scope)
       else:
         identifier_attributes['array'] = False
       self.semantic.identifier_declaration(identifier, scope, identifier_attributes)
@@ -433,7 +434,7 @@ class Parser:
         self.__array_decl()
         self.__var_list(scope, var_type)
       elif(token != None and (token.value in ['!', 'true', 'false', '(', 'global', 'local'] or token.key in ['IDE', 'NRO', 'CAD'])):
-        self.__exp()
+        self.__exp(scope)
         self.__var_list(scope, var_type)
       else:
         self.__error('\'{\', \'!\', \'true\', \'false\', \'(\', IDENTIFIER, STRING or NUMBER', ['int', 'real', 'boolean', 'string', 'identifier', 'typedef', 'struct', '}'])
@@ -551,7 +552,7 @@ class Parser:
         self.__error('IDENTIFIER', [')'])
     return params
 
-  def __else_stm(self):
+  def __else_stm(self, scope):
     token = self.__token()
     if(token != None and token.value == 'else'):
       self.__next_token()
@@ -560,18 +561,18 @@ class Parser:
         self.__next_token()
       else:
         self.__local_fix('\'{\'')
-      self.__func_stms()
+      self.__func_stms(scope)
       token = self.__token()
       if(token != None and token.value == '}'):
         self.__next_token()
       else:
         self.__error('\'}\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
 
-  def __if_stm(self):
+  def __if_stm(self, scope):
     token = self.__token()
     if(token != None and token.value == '('):
       self.__next_token()
-      self.__log_exp()
+      self.__log_exp(scope)
       token = self.__token()
       if(token != None and token.value == ')'):
         self.__next_token()
@@ -583,11 +584,11 @@ class Parser:
             self.__next_token()
           else:
             self.__local_fix('\'{\'')
-          self.__func_stms()
+          self.__func_stms(scope)
           token = self.__token()
           if(token != None and token.value == '}'):
             self.__next_token()
-            self.__else_stm()
+            self.__else_stm(scope)
           else:
             self.__error('\'}\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
         else:
@@ -597,11 +598,11 @@ class Parser:
     else:
       self.__error('\'(\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
 
-  def __while_stm(self):
+  def __while_stm(self, scope):
     token = self.__token()
     if(token != None and token.value == '('):
       self.__next_token()
-      self.__log_exp()
+      self.__log_exp(scope)
       token = self.__token()
       if(token != None and token.value == ')'):
         self.__next_token()
@@ -610,7 +611,7 @@ class Parser:
           self.__next_token()
         else:
           self.__local_fix('\'{\'')
-        self.__func_stms()
+        self.__func_stms(scope)
         token = self.__token()
         if(token != None and token.value == '}'):
           self.__next_token()
@@ -621,7 +622,7 @@ class Parser:
     else:
       self.__error('\'(\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
   
-  def __else_proc_stm(self):
+  def __else_proc_stm(self, scope):
     token = self.__token()
     if(token != None and token.value == 'else'):
       self.__next_token()
@@ -630,14 +631,14 @@ class Parser:
         self.__next_token()
       else:
         self.__local_fix('\'{\'')
-      self.__proc_stms()
+      self.__proc_stms(scope)
       token = self.__token()
       if(token != None and token.value == '}'):
         self.__next_token()
       else:
         self.__error('\'}\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', '}'])
 
-  def __if_proc_stm(self):
+  def __if_proc_stm(self, scope):
     token = self.__token()
     if(token != None and token.value == '('):
       self.__next_token()
@@ -653,11 +654,11 @@ class Parser:
             self.__next_token()
           else:
             self.__local_fix('\'{\'')
-          self.__proc_stms()
+          self.__proc_stms(scope)
           token = self.__token()
           if(token != None and token.value == '}'):
             self.__next_token()
-            self.__else_proc_stm()
+            self.__else_proc_stm(scope)
           else:
             self.__error('\'}\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', '}'])
         else:
@@ -667,7 +668,7 @@ class Parser:
     else:
       self.__error('\'(\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', '}'])
 
-  def __while_proc_stm(self):
+  def __while_proc_stm(self, scope):
     token = self.__token()
     if(token != None and token.value == '('):
       self.__next_token()
@@ -680,7 +681,7 @@ class Parser:
           self.__next_token()
         else:
           self.__local_fix('\'{\'')
-        self.__proc_stms()
+        self.__proc_stms(scope)
         token = self.__token()
         if(token != None and token.value == '}'):
           self.__next_token()
@@ -691,7 +692,7 @@ class Parser:
     else:
       self.__error('\'(\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', '}'])
 
-  def __access(self):
+  def __access(self, scope):
     token = self.__token()
     if(token != None and token.value == '.'):
       self.__next_token()
@@ -701,23 +702,23 @@ class Parser:
         token = self.__token()
         if(token != None and token.value == '['):
           self.__next_token()
-          self.__arrays()
+          self.__arrays(scope)
       else:
         self.__error('IDENTIFIER', ['.', '=', '++', '--', ';'])
     else:
       self.__error('\'.\'', ['.', '=', '++', '--', ';'])
         
-  def __accesses(self):
+  def __accesses(self, scope):
     token = self.__token()
     if(token != None and token.value == '.'):
-      self.__access()
-      self.__accesses()
+      self.__access(scope)
+      self.__accesses(scope)
 
-  def __assign(self):
+  def __assign(self, scope):
     token = self.__token()
     if(token != None and token.value == '='):
       self.__next_token()
-      self.__exp()
+      self.__exp(scope)
       token = self.__token()
       if(token != None and token.value == ';'):
         self.__next_token()
@@ -740,22 +741,22 @@ class Parser:
     else:
       self.__error('\'=\', \'++\' or \'--\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
     
-  def __stm_id(self):
+  def __stm_id(self, scope):
     token = self.__token()
     if(token != None and (token.value == '=' or token.value == '++' or token.value == '--')):
-      self.__assign()
+      self.__assign(scope)
     elif(token != None and token.value == '['):
       self.__next_token()
-      self.__arrays()
-      self.__accesses()
-      self.__assign()
+      self.__arrays(scope)
+      self.__accesses(scope)
+      self.__assign(scope)
     elif(token != None and token.value == '.'):
-      self.__access()
-      self.__accesses()
-      self.__assign()
+      self.__access(scope)
+      self.__accesses(scope)
+      self.__assign(scope)
     elif(token != None and token.value == '('):
       self.__next_token()
-      self.__args()
+      self.__args(scope)
       token = self.__token()
       if(token != None and token.value == ')'):
         self.__next_token()
@@ -771,22 +772,22 @@ class Parser:
 
      
 
-  def __var_stm(self):
+  def __var_stm(self, scope):
     token = self.__token()
     if(token != None and (token.value == 'local' or token.value == 'global')):
       self.__next_token()
-      self.__access()
-      self.__accesses()
-      self.__assign()
+      self.__access(scope)
+      self.__accesses(scope)
+      self.__assign(scope)
     elif(token != None and token.key == 'IDE'):
       self.__next_token()
-      self.__stm_id()
+      self.__stm_id(scope)
     elif(token != None and (token.value == 'print' or token.value == 'read')):
       self.__next_token()
       token = self.__token()
       if(token != None and token.value == '('):
         self.__next_token()
-        self.__args()
+        self.__args(scope)
         token = self.__token()
         if(token != None and token.value == ')'):
           self.__next_token()
@@ -802,19 +803,19 @@ class Parser:
     else:
       self.__error('\'local\', \'global\', IDENTIFIER, \'print\' or \'read\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
 
-  def __proc_stms(self):
+  def __proc_stms(self, scope):
     token = self.__token()
     if(token != None and token.value == 'if'):
       self.__next_token()
-      self.__if_proc_stm()
-      self.__proc_stms()
+      self.__if_proc_stm(scope)
+      self.__proc_stms(scope)
     elif(token != None and token.value == 'while'):
       self.__next_token()
-      self.__while_proc_stm()
-      self.__proc_stms()
+      self.__while_proc_stm(scope)
+      self.__proc_stms(scope)
     elif(token != None and (token.key == 'IDE' or token.value == 'local' or token.value == 'global' or token.value == 'print' or token.value == 'read')):
-      self.__var_stm()
-      self.__proc_stms()
+      self.__var_stm(scope)
+      self.__proc_stms(scope)
 
   def __proc_block(self, scope):
     token = self.__token()
@@ -826,29 +827,29 @@ class Parser:
     if(token != None and token.value == 'var'):
       self.__next_token()
       self.__var_block(scope)
-    self.__proc_stms()
+    self.__proc_stms(scope)
     token = self.__token()
     if(token != None and token.value == '}'):
       self.__next_token()
     else:
       self.__error('\'}\'', ['function', 'procedure', 'struct', 'typedef', 'start'])    
 
-  def __func_stms(self):
+  def __func_stms(self, scope):
     token = self.__token()
     if(token != None and token.value == 'if'):
       self.__next_token()
       self.__if_stm()
-      self.__func_stms()
+      self.__func_stms(scope)
     elif(token != None and token.value == 'while'):
       self.__next_token()
       self.__while_stm()
-      self.__func_stms()
+      self.__func_stms(scope)
     elif(token != None and (token.key == 'IDE' or token.value == 'local' or token.value == 'global' or token.value == 'print' or token.value == 'read')):
-      self.__var_stm()
-      self.__func_stms()
+      self.__var_stm(scope)
+      self.__func_stms(scope)
     elif(token != None and token.value == 'return'):
       self.__next_token()
-      self.__exp()
+      self.__exp(scope)
       token = self.__token()
       if(token != None and token.value == ';'):
         self.__next_token()
@@ -866,7 +867,7 @@ class Parser:
     if(token != None and token.value == 'var'):
       self.__next_token()
       self.__var_block(scope)
-    self.__func_stms()
+    self.__func_stms(scope)
     token = self.__token()
     if(token != None and token.value == '}'):
       self.__next_token()
