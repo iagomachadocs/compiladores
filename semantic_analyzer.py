@@ -118,24 +118,31 @@ class SemanticAnalyzer:
     else:
       self.error('invalid type', token.line, typedef_type)
 
-  def struct_declaration(self, token, extends=None, typedef=False):
+  def struct_declaration(self, token, extends=None):
     identifier = 'struct '+token.value
     if(identifier not in self.scopes['global']):
       if(extends != None):
+        self.scopes['global'][identifier] = {'class': 'struct'}
+        self.scopes[identifier] = {}
         if(self.check_type(extends)):
-          self.scopes['global'][identifier] = {'class': 'struct', 'extends': extends}
-          self.scopes[identifier] = {}
-          if(typedef):
-            self.type_declaration(identifier, token, 'global')
-          return identifier
+          self.scopes[identifier] = self.scopes[extends].copy()   
         else:
           self.error('invalid type', token.line, extends)
+        return identifier
       else:
-        self.scopes['global'][identifier] = {'class': 'struct', 'extends': extends}
+        self.scopes['global'][identifier] = {'class': 'struct'}
         self.scopes[identifier] = {}
-        if(typedef):
-          self.type_declaration(identifier, token, 'global')
         return identifier  
-      
     else:
       self.error('duplicated identifier', token.line, identifier)
+
+  def typedef_struct_declaration(self, token):
+    identifier = 'struct '+token.value
+    if(identifier not in self.scopes['global']):
+      self.scopes['global'][identifier] = self.scopes['global']['struct _temp'].copy()
+      self.scopes[identifier] = self.scopes['struct _temp'].copy()
+      self.type_declaration(identifier, token, 'global')
+    else:
+      self.error('duplicated identifier', token.line, identifier) 
+    del self.scopes['global']['struct _temp']
+    del self.scopes['struct _temp']

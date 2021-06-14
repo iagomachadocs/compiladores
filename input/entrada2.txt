@@ -17,6 +17,10 @@ struct ponto {
    real y; 
 }
 
+typedef struct extends struct ponto {
+   real z;
+} coord;
+
 function int soma(int a[], int b) {
    var{
       int teste2;
