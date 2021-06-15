@@ -27,7 +27,7 @@ function int soma(int a[], int b) {
       int array[3];
       real y = 2.3;
    }
-   array[y] = 0
+   array[y] = 0;
 }
 
 function real soma(real a[], real b[]) {
@@ -39,5 +39,5 @@ procedure multiplica(int c, int b) {
 }
 
 start() {
-  
+  global.c = 10;
 }   

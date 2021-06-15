@@ -12,7 +12,8 @@ class SemanticAnalyzer:
       'duplicated function': 'Function \'{}\' has already been declared.'.format(value),
       'duplicated procedure': 'Procedure \'{}\' has already been declared.'.format(value),
       'not defined': '\'{}\' is not defined.'.format(value),
-      'array index type': 'Array index must be integer.'
+      'array index type': 'Array index must be integer.',
+      'const assign': '\'{}\' is a constant and cannot be assigned.'.format(value),
     }
     self.output.write('{} Semantic error: {}\n'.format(line, messages[error]))
     print('-> Semantic error - line {}: {}'.format(line, messages[error]))
@@ -177,4 +178,16 @@ class SemanticAnalyzer:
     else:
       self.error('array index type', token.line, value)
       return False
+
+  def check_const_assign(self, token, scope, scope_definition=None):
+    identifier = token.value
+    if(scope == 'global' or scope_definition == 'global'):
+      if(identifier in self.scopes['global']):
+        if(self.scopes['global'][identifier]['class'] == 'const'):
+          self.error('const assign', token.line, identifier)
+      else:
+        self.error('not defined', token.line, identifier)
+    
+        
+
       

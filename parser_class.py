@@ -692,12 +692,13 @@ class Parser:
     else:
       self.__error('\'(\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', '}'])
 
-  def __access(self, scope):
+  def __access(self, scope, scope_definition=None):
     token = self.__token()
     if(token != None and token.value == '.'):
       self.__next_token()
       token = self.__token()
       if(token != None and token.key == 'IDE'):
+        self.semantic.check_const_assign(token, scope, scope_definition)
         self.__next_token()
         token = self.__token()
         if(token != None and token.value == '['):
@@ -741,18 +742,21 @@ class Parser:
     else:
       self.__error('\'=\', \'++\' or \'--\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
     
-  def __stm_id(self, scope):
+  def __stm_id(self, scope, identifier):
     token = self.__token()
     if(token != None and (token.value == '=' or token.value == '++' or token.value == '--')):
+      self.semantic.check_const_assign(identifier, scope)
       self.__assign(scope)
     elif(token != None and token.value == '['):
       self.__next_token()
       self.__arrays(scope)
       self.__accesses(scope)
+      self.semantic.check_const_assign(identifier, scope)
       self.__assign(scope)
     elif(token != None and token.value == '.'):
       self.__access(scope)
       self.__accesses(scope)
+      self.semantic.check_const_assign(identifier, scope)
       self.__assign(scope)
     elif(token != None and token.value == '('):
       self.__next_token()
@@ -775,13 +779,15 @@ class Parser:
   def __var_stm(self, scope):
     token = self.__token()
     if(token != None and (token.value == 'local' or token.value == 'global')):
+      scope_definition = token.value
       self.__next_token()
-      self.__access(scope)
+      self.__access(scope, scope_definition)
       self.__accesses(scope)
       self.__assign(scope)
     elif(token != None and token.key == 'IDE'):
+      identifier = token
       self.__next_token()
-      self.__stm_id(scope)
+      self.__stm_id(scope, identifier)
     elif(token != None and (token.value == 'print' or token.value == 'read')):
       self.__next_token()
       token = self.__token()
