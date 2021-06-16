@@ -692,28 +692,34 @@ class Parser:
     else:
       self.__error('\'(\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', '}'])
 
-  def __access(self, scope, scope_definition=None):
+  def __access(self, scope, accesses):
     token = self.__token()
     if(token != None and token.value == '.'):
       self.__next_token()
       token = self.__token()
       if(token != None and token.key == 'IDE'):
-        self.semantic.check_const_assign(token, scope, scope_definition)
+        identifier = {'token': token}
         self.__next_token()
         token = self.__token()
         if(token != None and token.value == '['):
+          identifier['array'] = True
           self.__next_token()
           self.__arrays(scope)
+        else:
+          identifier['array'] = False
+        accesses.append(identifier)
       else:
         self.__error('IDENTIFIER', ['.', '=', '++', '--', ';'])
     else:
       self.__error('\'.\'', ['.', '=', '++', '--', ';'])
+    return accesses
         
-  def __accesses(self, scope):
+  def __accesses(self, scope, accesses):
     token = self.__token()
     if(token != None and token.value == '.'):
-      self.__access(scope)
-      self.__accesses(scope)
+      accesses = self.__access(scope, accesses)
+      accesses = self.__accesses(scope, accesses)
+    return accesses
 
   def __assign(self, scope):
     token = self.__token()
@@ -750,13 +756,17 @@ class Parser:
     elif(token != None and token.value == '['):
       self.__next_token()
       self.__arrays(scope)
-      self.__accesses(scope)
+      identifier_access = {'token': identifier, 'array': True }
+      accesses = self.__accesses(scope, [])
       self.semantic.check_const_assign(identifier, scope)
+      self.semantic.check_accesses(scope, identifier_access, accesses)
       self.__assign(scope)
     elif(token != None and token.value == '.'):
-      self.__access(scope)
-      self.__accesses(scope)
+      identifier_access = {'token': identifier, 'array': False}
+      accesses = self.__access(scope, [])
+      accesses = self.__accesses(scope, accesses)
       self.semantic.check_const_assign(identifier, scope)
+      self.semantic.check_accesses(scope, identifier_access, accesses)
       self.__assign(scope)
     elif(token != None and token.value == '('):
       self.__next_token()
@@ -781,8 +791,13 @@ class Parser:
     if(token != None and (token.value == 'local' or token.value == 'global')):
       scope_definition = token.value
       self.__next_token()
-      self.__access(scope, scope_definition)
-      self.__accesses(scope)
+      first_access = self.__access(scope, [])
+      first_identifier = first_access[0]
+      accesses = self.__accesses(scope, [])
+      if(len(first_access) > 0):
+        identifier = first_identifier['token']
+        self.semantic.check_const_assign(identifier, scope, scope_definition)
+        self.semantic.check_accesses(scope, first_identifier, accesses, scope_definition)
       self.__assign(scope)
     elif(token != None and token.key == 'IDE'):
       identifier = token

@@ -2,7 +2,8 @@ class SemanticAnalyzer:
   def __init__(self, output):
     self.output = output
     self.scopes = {
-      'global': {}
+      'global': {},
+      'start': {}
     }
   
   def error(self, error, line, value):
@@ -14,6 +15,9 @@ class SemanticAnalyzer:
       'not defined': '\'{}\' is not defined.'.format(value),
       'array index type': 'Array index must be integer.',
       'const assign': '\'{}\' is a constant and cannot be assigned.'.format(value),
+      'not array': '\'{}\' is not an array.'.format(value),
+      'invalid property': '\'{}\' is not a valid property.'.format(value),
+      'not struct': '\'{}\' is not a struct.'.format(value)
     }
     self.output.write('{} Semantic error: {}\n'.format(line, messages[error]))
     print('-> Semantic error - line {}: {}'.format(line, messages[error]))
@@ -185,9 +189,119 @@ class SemanticAnalyzer:
       if(identifier in self.scopes['global']):
         if(self.scopes['global'][identifier]['class'] == 'const'):
           self.error('const assign', token.line, identifier)
+
+    elif(identifier not in self.scopes[scope] and scope_definition == None):
+      if(identifier in self.scopes['global']):
+        if(self.scopes['global'][identifier]['class'] == 'const'):
+            self.error('const assign', token.line, identifier)
       else:
         self.error('not defined', token.line, identifier)
-    
-        
+      
+  def check_accesses(self, scope, identifier, accesses, scope_definition=None):
+    token = identifier['token']
+    if(scope_definition == None):
+      if(token.value in self.scopes[scope] or token.value in self.scopes['global']):
+        if(token.value not in self.scopes[scope]):
+          scope = 'global'
+        is_array = self.scopes[scope][token.value]['array']
+        if(identifier['array'] and not is_array):
+          self.error('not array', token.line, token.value)
+          return
+        else:
+          obj = self.scopes[scope][token.value]
+          key = token
+          for prop in accesses:
+            obj_type = obj['type']
+            if(obj_type not in self.scopes['global']):
+              self.error('not struct', key.line, key.value)
+              return
+            if(self.scopes['global'][obj_type]['class'] == 'struct'):
+              prop_value = prop['token'].value
+              if(prop_value not in self.scopes[obj_type]):
+                self.error('invalid property', prop['token'].line, prop_value)
+                return
+              elif(prop['array'] and not self.scopes[obj_type][prop_value]['array']):
+                self.error('not array', prop['token'].line, prop_value)
+                return
+            elif(self.scopes['global'][obj_type]['class'] == 'type'):
+              real_type = self.scopes['global'][obj_type]['type']
+              obj_type = real_type
+              if(obj_type not in self.scopes['global']):
+                self.error('not struct', key.line, key.value)
+                return
+              type_dict = self.scopes['global'][real_type]
+              if(type_dict['class'] == 'struct'):
+                prop_value = prop['token'].value
+                if(prop_value not in self.scopes[real_type]):
+                  self.error('invalid property', prop['token'].line, prop_value)
+                  return
+                elif(prop['array'] and not self.scopes[real_type][prop_value]['array']):
+                  self.error('not array', prop['token'].line, prop_value)
+                  return
+              else:
+                self.error('not struct', key.line, key.value)
+                return
+            else:
+              self.error('not struct', key.line, key.value)
+              return
+            key = prop['token']
+            obj = self.scopes[obj_type][key.value]
+    else:
+      if(scope_definition == 'global'):
+        scope = 'global'
+      if(token.value in self.scopes[scope]):
+        is_array = self.scopes[scope][token.value]['array']
+        if(identifier['array'] and not is_array):
+          self.error('not array', token.line, token.value)
+          return
+        else:
+          obj = self.scopes[scope][token.value]
+          key = token
+          for prop in accesses:
+            obj_type = obj['type']
+            if(obj_type not in self.scopes['global']):
+              self.error('not struct', key.line, key.value)
+              return
+            if(self.scopes['global'][obj_type]['class'] == 'struct'):
+              prop_value = prop['token'].value
+              if(prop_value not in self.scopes[obj_type]):
+                self.error('invalid property', prop['token'].line, prop_value)
+                return
+              elif(prop['array'] and not self.scopes[obj_type][prop_value]['array']):
+                self.error('not array', prop['token'].line, prop_value)
+                return
+            elif(self.scopes['global'][obj_type]['class'] == 'type'):
+              real_type = self.scopes['global'][obj_type]['type']
+              obj_type = real_type
+              if(obj_type not in self.scopes['global']):
+                self.error('not struct', key.line, key.value)
+                return
+              type_dict = self.scopes['global'][real_type]
+              if(type_dict['class'] == 'struct'):
+                prop_value = prop['token'].value
+                if(prop_value not in self.scopes[real_type]):
+                  self.error('invalid property', prop['token'].line, prop_value)
+                  return
+                elif(prop['array'] and not self.scopes[real_type][prop_value]['array']):
+                  self.error('not array', prop['token'].line, prop_value)
+                  return
+              else:
+                self.error('not struct', key.line, key.value)
+                return
+            else:
+              self.error('not struct', key.line, key.value)
+              return
+            key = prop['token']
+            obj = self.scopes[obj_type][key.value]
+      else:
+        self.error('not defined', token.line, token.value)
+        return
+
+
+
+            
+
+
+
 
       
