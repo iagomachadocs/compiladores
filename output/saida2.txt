@@ -155,16 +155,10 @@
 47 IDE a
 47 DEL ;
 48 DEL }
-49 IDE c
-49 DEL .
-49 IDE x
+49 IDE w
 49 REL =
-49 NRO 0
+49 IDE j
 49 DEL ;
-50 DEL }
+51 DEL }
 
-49 Semantic error: 'c' is a constant and cannot be assigned.
-49 Semantic error: 'c' is not a struct.
-----------------------------
-Successful lexical analysis! No errors found.
-Successful syntax analysis! No errors found.
+49 Semantic error: 'w' is not defined.

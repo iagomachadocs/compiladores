@@ -17,7 +17,9 @@ class SemanticAnalyzer:
       'const assign': '\'{}\' is a constant and cannot be assigned.'.format(value),
       'not array': '\'{}\' is not an array.'.format(value),
       'invalid property': '\'{}\' is not a valid property.'.format(value),
-      'not struct': '\'{}\' is not a struct.'.format(value)
+      'not struct': '\'{}\' is not a struct.'.format(value),
+      'invalid operation': 'Invalid operation for type \'{}\'.'.format(value),
+      'distinct types': 'Operations between different types not allowed.'
     }
     self.output.write('{} Semantic error: {}\n'.format(line, messages[error]))
     print('-> Semantic error - line {}: {}'.format(line, messages[error]))
@@ -196,7 +198,41 @@ class SemanticAnalyzer:
             self.error('const assign', token.line, identifier)
       else:
         self.error('not defined', token.line, identifier)
-      
+  
+  def int_or_real(self, token):
+    integer = self.is_integer(token)
+    if(integer):
+      return 'int'
+    return 'real'
+
+  def check_numbers(self, first_type, second_type, line):
+    if(first_type == None):
+      return None
+    elif(second_type == None):
+      if(first_type == 'int' or first_type == 'real'):
+        return first_type
+    else:
+      if(first_type == second_type):
+        if(first_type == 'int' or first_type == 'real'):
+          return first_type
+        else:
+          self.error('invalid operation', line, first_type)
+      else:
+        self.error('distinct types', line, None)
+    return None
+
+  def check_boolean(self, first_type, second_type, line):
+    if(first_type == None):
+      return None
+    elif(second_type == None):
+      return first_type
+    else:
+      if(first_type == second_type and first_type == 'boolean'):
+        return first_type
+      else:
+        self.error('invalid operation', line, first_type)
+        return None
+
   def check_accesses(self, scope, identifier, accesses, scope_definition=None):
     token = identifier['token']
     if(scope_definition == None):

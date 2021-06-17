@@ -76,7 +76,7 @@ class Parser:
       self.__args_list(scope)
 
 
-  def __id_value(self, scope):
+  def __id_value(self, scope, identifier):
     token = self.__token()
     if(token != None and token.value == '('):
       self.__next_token()
@@ -89,22 +89,37 @@ class Parser:
     elif(token != None and token.value == '['):
       self.__next_token()
       self.__arrays(scope)
-    self.__accesses(scope)
+    accesses = self.__accesses(scope, [])
 
   def __value(self, scope):
     token = self.__token()
     if(token != None and token.value == '-'):
+      token_aux = token
       self.__next_token()
-      self.__value(scope)
+      id_type = self.__value(scope)
+      if(not (id_type == 'int' or id_type == 'real') and id_type != None):
+        self.semantic.error('invalid operation', token_aux.line, id_type)
+        id_type = None
     elif(token != None and (token.key == 'NRO' or token.key == 'CAD' or token.value == 'true' or token.value == 'false')):
+      if(token.key == 'NRO'):
+        id_type = self.semantic.int_or_real(token)
+      elif(token.key == 'CAD'):
+        id_type = 'string'
+      else:
+        id_type = 'boolean'
       self.__next_token()
     elif(token != None and (token.value == 'local' or token.value == 'global')):
+      scope_definition = token.value
       self.__next_token()
-      self.__access(scope)
-      self.__accesses(scope)
+      first_access = self.__access(scope, []) 
+      accesses = self.__accesses(scope, [])
+      if(len(first_access) > 0):
+        identifier = first_access[0]
+        self.semantic.check_accesses(scope, identifier, accesses, scope_definition)
     elif(token != None and token.key == 'IDE'):
+      identifier = token.value
       self.__next_token()
-      self.__id_value(scope)
+      self.__id_value(scope, identifier)
     elif(token != None and token.value == '('):
       self.__next_token()
       self.__exp(scope)
@@ -115,80 +130,137 @@ class Parser:
         self.__error('\')\'', ['*', '/', '+', '-', '>', '<', '<=', '>=', '==', '!=', '&&', '||', '}', ']', ')', ',', ';'])
     else:
       self.__error('\'(\', IDENTIFIER, STRING, NUMBER, \'true\', \'false\', \'global\' or \'local\'', ['*', '/', '+', '-', '>', '<', '<=', '>=', '==', '!=', '&&', '||', '}', ']', ')', ',', ';'])
+    return id_type
   
   def __unary(self, scope):
     token = self.__token()
     if(token != None and token.value == '!'):
+      token_aux = token
       self.__next_token()
-      self.__unary(scope)
+      id_type = self.__unary(scope)
+      if(id_type != 'boolean' and id_type != None):
+        self.semantic.error('invalid operation', token_aux.line, id_type)
+        id_type = None
     else:
-      self.__value(scope)
+      id_type = self.__value(scope)
+    return id_type
   
   def __mult_aux(self, scope):
     token = self.__token()
     if(token != None and (token.value == '*' or token.value == '/')):
       self.__next_token()
-      self.__unary(scope)
-      self.__mult_aux(scope)
+      type_unary = self.__unary(scope)
+      type_mult = self.__mult_aux(scope)
+      id_type = self.semantic.check_numbers(type_unary, type_mult, token.line)
+      return id_type
+    return None
 
   def __mult(self, scope):
-    self.__unary(scope)
-    self.__mult_aux(scope)  
+    line = self.__token().line
+    type_unary = self.__unary(scope)
+    type_mult = self.__mult_aux(scope)
+    if(type_mult == None):
+      return type_unary
+    else:
+      return self.semantic.check_numbers(type_unary, type_mult, line)
   
   def __add_aux(self, scope):
     token = self.__token()
     if(token != None and (token.value == '+' or token.value == '-')):
       self.__next_token()
-      self.__mult(scope)
-      self.__add_aux(scope)
+      type_mult = self.__mult(scope)
+      type_add = self.__add_aux(scope)
+      id_type = self.semantic.check_numbers(type_mult, type_add, token.line)
+      return id_type
+    return None
 
   def __add(self, scope):
-    self.__mult(scope)
-    self.__add_aux(scope)
+    line = self.__token().line
+    type_mult = self.__mult(scope)
+    type_add = self.__add_aux(scope)
+    if(type_add == None):
+      return type_mult
+    else:
+      return self.semantic.check_numbers(type_mult, type_add, line)
 
   def __compare_aux(self, scope):
     token = self.__token()
     if(token != None and (token.value == '<' or token.value == '>' or token.value == '<=' or token.value == '>=')):
       self.__next_token()
-      self.__add(scope)
-      self.__compare_aux(scope)
+      type_add = self.__add(scope)
+      type_compare = self.__compare_aux(scope)
+      id_type = self.semantic.check_numbers(type_add, type_compare, token.line)
+      return id_type
+    return None
 
   def __compare(self, scope):
-    self.__add(scope)
-    self.__compare_aux(scope)
+    line = self.__token().line
+    type_add = self.__add(scope)
+    type_compare = self.__compare_aux(scope)
+    if(type_compare == None):
+      return type_add
+    elif(type_add == None):
+      return None
+    else:
+      id_type = self.semantic.check_numbers(type_add, type_compare, line)
+      if(id_type != None):
+        return 'boolean'
+      return None
   
   def __equate_aux(self, scope):
     token = self.__token()
     if(token != None and (token.value == '==' or token.value == '!=')):
       self.__next_token()
-      self.__compare(scope)
-      self.__equate_aux(scope)
+      type_compare = self.__compare(scope)
+      type_equate = self.__equate_aux(scope)
+      if(type_equate == None):
+        return type_compare
+      elif(type_compare == None):
+        return None
+      else:
+        return 'boolean'
+    return None
 
   def __equate(self, scope):
-    self.__compare(scope)
-    self.__equate_aux(scope)
-  
+    type_compare = self.__compare(scope)
+    type_equate = self.__equate_aux(scope)
+    if(type_equate == None):
+      return type_compare
+    elif(type_compare == None):
+      return None
+    else:
+      return 'boolean'
+
   def __and_aux(self, scope):
     token = self.__token()
     if(token != None and token.value == '&&'):
+      line = token.line
       self.__next_token()
-      self.__equate(scope)
-      self.__and_aux(scope)
+      type_equate = self.__equate(scope)
+      type_and = self.__and_aux(scope)
+      return self.semantic.check_boolean(type_equate, type_and, line)
+    return None
 
   def __and(self, scope):
-    self.__equate(scope)
-    self.__and_aux(scope)
+    line = self.__token().line
+    type_equate = self.__equate(scope)
+    type_and = self.__and_aux(scope)
+    return self.semantic.check_boolean(type_equate, type_and, line)
 
   def __or(self, scope):
     token = self.__token()
     if(token != None and token.value == '||'):
       self.__next_token()
-      self.__and(scope)
-      self.__or(scope)  
+      type_and = self.__and(scope)
+      type_or = self.__or(scope)
+      return self.semantic.check_boolean(type_and, type_or, token.line)
+    return None
   
   def __exp(self, scope):
-    self.__and(scope)
-    self.__or(scope)
+    line = self.__token().line
+    type_and = self.__and(scope)
+    type_or = self.__or(scope)
+    return self.semantic.check_boolean(type_and, type_or, line)
 
   def __log_value(self, scope):
     token = self.__token()
@@ -725,7 +797,8 @@ class Parser:
     token = self.__token()
     if(token != None and token.value == '='):
       self.__next_token()
-      self.__exp(scope)
+      type_exp = self.__exp(scope)
+      print(type_exp)
       token = self.__token()
       if(token != None and token.value == ';'):
         self.__next_token()
