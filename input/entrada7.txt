@@ -1,0 +1,65 @@
+const {
+   string teste = "uma string de teste";
+   boolean bool = true, bool2 = 11;   // Erro de tipo. Tentativa de atribuir inteiro a um booleano
+   int i = 0.5;         // Erro de tipo. Atribuindo real a inteiro.
+   real b = 3.42, pi = 3.14, letra = "a";   // Erro de tipo. Atribuindo string a real
+   typedef int tipo;
+   tipo c = 3;
+}
+
+var {
+  int a = 1+1.4;    //Erro de operacao invalida, pela soma de real com inteiro
+}
+
+struct ponto {
+   real x;
+   real y; 
+}
+
+typedef struct extends struct ponto {
+   real z;
+} coord;
+
+struct teste {
+   coord b;
+}
+
+function int soma(int a, int b) {
+   var{
+      int aux[2];
+   }
+   aux[0] = a;
+   aux[0.5] = b; // Erro de tipo no indice do array, que deve ser inteiro
+   b[0] = a; // Erro. 'b' não é um array
+   return a+b;
+}
+
+function real soma(real a, real b) {
+   return a+b;
+}
+
+procedure exibeSoma(int c, int b) {
+   print(soma(c, b));
+}
+
+start() {
+  var{
+    struct teste pog;
+    struct ponto a;
+    int result;
+    int c = 0, d = 0;
+  }
+  local.a.x = 5.2;
+  local.a.y = true; // Erro de tipo, esperava real e atribuiu boolean
+  result = soma(1,2)+5;
+  print(result.x); // Erro. result não é uma struct
+  pog.b.z = a[1]; // Erro. 'a' não é um array
+  a.teste = 2;  // Erro. 'a' não possui nenhuma propriedade com o nome 'teste'
+  while(c >= d) {
+     if(a.x == 5) then {
+         print(a.x);
+      } else {
+         h = global.b; //Erro. variável h não declarada
+      }
+  }
+}   

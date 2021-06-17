@@ -1,51 +1,28 @@
-const {
-   string teste = "uma string de teste";
-   boolean bool = true, bool2 = 11;
-   int i = 0.5;
-   real b = 3.42, pi = 3.14, letra = "a";
-   typedef int tipo;
-   tipo c = 3;
+/*
+ * Duplicidade de identificadores locais
+ */
+
+procedure p(int x, real y) {
+	var {
+		int valor1, valor2, valor3;
+		real b;
+		string valor1, valor2; // Erro nas 2 variáveis
+	}
 }
 
-var {
-  int a = true;
-}
+function int f(int x, real x) { // Erro no 'x'
+	var {
+		string nome, sobrenome, idade;
+		int d, e, idade;     // Erro em 'idade'
+	}
 
-struct ponto {
-   real x;
-   real y; 
-}
-
-typedef struct extends struct ponto {
-   real z;
-} coord;
-
-struct teste {
-   coord b;
-}
-
-function int soma(int a[], int b) {
-   var{
-      int teste2;
-      int array[3];
-      real y = 2.3;
-      struct teste p[2];
-   }
-}
-
-function real soma(real a[], real b[]) {
-
-}
-
-procedure multiplica(int c, int b) {
-
+	return e;
 }
 
 start() {
-  var{
-    struct teste pog;
-    struct ponto a;
-  }
-  local.a.x = pog[2];
-
-}   
+	var {
+		boolean a; 
+		int b;
+		real a; // Erro no 'a' 
+	}
+}

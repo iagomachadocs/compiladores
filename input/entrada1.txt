@@ -1,0 +1,33 @@
+/*
+ * Duplicidade de identificadores globais
+ */
+
+const {
+	real a_ = 6.0;
+	boolean c = true;
+	int c = 1; // Erro no c. Identificador já declarado.
+	int d = 6;
+}
+
+var {
+	int a_;    // Erro no a_. Identificador já declarado.
+	string b;
+	real d; // Erro no d. Identificador já declarado.
+}
+
+function real soma() {
+	var {
+		boolean a_; 
+		int c;	  
+		real d;   
+	}
+	return c;     // Não é possível retornar inteiro em um real
+} 
+
+start() {
+	var {
+		boolean b; 
+		int c;   
+		real d;  
+	}
+}

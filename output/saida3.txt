@@ -1,0 +1,9 @@
+
+17 Semantic error: Procedure 'teste()' has already been declared.
+23 Semantic error: Function 'f()' has already been declared.
+27 Semantic error: Function 'f(real)' has already been declared.
+31 Semantic error: Function 'f()' has already been declared.
+33 Semantic error: Function 'f(real)' has already been declared.
+----------------------------
+Successful lexical analysis! No errors found.
+Successful syntax analysis! No errors found.

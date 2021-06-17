@@ -1,0 +1,69 @@
+
+const {
+	real a_ = 6; // Erro de tipo. Tentou colocar inteiro no real
+	boolean c = 6; // Erro de tipo. Tentou colocar inteiro no boolean
+	int d = 6;
+	real pi = 3.14, euller = 6; // Erro de tipo. Tentou colocar inteiro no real
+}
+
+var {
+	int a_;    // Erro. Identificador já declarado
+	string b;
+	real d; // Erro. Identificador já declarado
+	int a;
+	string c_;
+}
+
+
+procedure p(int x, real y) {
+	var {
+		int valor1, valor2, valor3;
+		real b;
+		string valor1, valor2; // Erro. Identificadores já declarados.
+	}
+}
+
+function int f(int a) {
+	a = 42;
+
+	c = 3.14; // Erro. c é uma constante. Também ocorre erro de tipo, pois c é boolean
+	d = "test"; // Erro. d é uma constante. Também ocorre erro de tipo, pois d é inteiro
+
+	return a;
+}
+
+function int f() {
+	var {
+		real pi, d, e;
+	}
+
+	pi = 3.14;
+	local.d = 2.17;
+
+	global.euller = 2.718; // Erro. Não é possível associar valores a constantes.
+
+	return 0;
+}
+
+start() {
+	b = fb(); // Erro. Função não declarada.
+	i = fi(); // Erro. 'i' não declarado' e função fi não declarada.
+	r = fr(); // Erro. 'r' não declarado e função fr não declarada.
+	s = fs(); // Erro. 's' não declarado e função fs não declarada.
+	p(0, 0.2);
+	p(0.2, 0.2); // Erro. Não existe p() recebendo dois reais nos parâmetros.
+	p0();    // Erro. Não existe função p0()
+	
+	global.a[5] = 6; // Erro. 'a' não é um array.
+
+	b = !b; // Erro. Não é possível utilizar o operador ! em uma string.
+
+	s = (i > 1) && (r > 1.3) || s == 0; // Erro. 's' não declarado.
+
+	func(); // Erro. 'func' não declarado.
+  func2(a,b); // Erro. 'func2' não declarado.
+
+}
+
+
+

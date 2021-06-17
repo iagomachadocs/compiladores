@@ -1,0 +1,8 @@
+
+22 Semantic error: 'e' is not defined.
+23 Semantic error: 'd' is a constant and cannot be assigned.
+32 Semantic error: 'c' is a constant and cannot be assigned.
+33 Semantic error: 'd' is a constant and cannot be assigned.
+----------------------------
+Successful lexical analysis! No errors found.
+Successful syntax analysis! No errors found.

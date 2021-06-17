@@ -1,0 +1,30 @@
+
+3 Semantic error: Incorrect type assigned. Expected 'real'.
+4 Semantic error: Incorrect type assigned. Expected 'boolean'.
+6 Semantic error: Incorrect type assigned. Expected 'real'.
+10 Semantic error: Identifier 'a_' has already been declared.
+12 Semantic error: Identifier 'd' has already been declared.
+22 Semantic error: Identifier 'valor1' has already been declared.
+22 Semantic error: Identifier 'valor2' has already been declared.
+29 Semantic error: 'c' is a constant and cannot be assigned.
+29 Semantic error: Incorrect type assigned. Expected 'boolean'.
+30 Semantic error: 'd' is a constant and cannot be assigned.
+30 Semantic error: Incorrect type assigned. Expected 'int'.
+43 Semantic error: 'euller' is a constant and cannot be assigned.
+49 Semantic error: Function 'fb()' is not defined.
+50 Semantic error: 'i' is not defined.
+50 Semantic error: Function 'fi()' is not defined.
+51 Semantic error: 'r' is not defined.
+51 Semantic error: Function 'fr()' is not defined.
+52 Semantic error: 's' is not defined.
+52 Semantic error: Function 'fs()' is not defined.
+54 Semantic error: Function 'p(real, real)' is not defined.
+55 Semantic error: Function 'p0()' is not defined.
+57 Semantic error: 'a' is not an array.
+59 Semantic error: Invalid operation for type 'string'.
+61 Semantic error: 's' is not defined.
+63 Semantic error: Function 'func()' is not defined.
+64 Semantic error: Function 'func2(int, string)' is not defined.
+----------------------------
+Successful lexical analysis! No errors found.
+Successful syntax analysis! No errors found.

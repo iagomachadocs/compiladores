@@ -1,0 +1,9 @@
+
+11 Semantic error: Identifier 'a' has already been declared.
+17 Semantic error: 'd' is not defined.
+28 Semantic error: Function 'f()' is not defined.
+29 Semantic error: Function 'func()' is not defined.
+30 Semantic error: Function 'func_2(int)' is not defined.
+----------------------------
+Successful lexical analysis! No errors found.
+Successful syntax analysis! No errors found.

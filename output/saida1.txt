@@ -1,0 +1,8 @@
+
+8 Semantic error: Identifier 'c' has already been declared.
+13 Semantic error: Identifier 'a_' has already been declared.
+15 Semantic error: Identifier 'd' has already been declared.
+24 Semantic error: Incorrect type assigned. Expected 'real'.
+----------------------------
+Successful lexical analysis! No errors found.
+Successful syntax analysis! No errors found.

@@ -1,0 +1,13 @@
+
+30 Semantic error: Function 'f2(string, real)' is not defined.
+43 Semantic error: Function 'p0(boolean)' is not defined.
+46 Semantic error: Function 'p1(int, boolean)' is not defined.
+48 Semantic error: Function 'p2(boolean, int)' is not defined.
+52 Semantic error: Function 'f0(real)' is not defined.
+55 Semantic error: Function 'f1(string, real)' is not defined.
+57 Semantic error: Function 'f2(real, string)' is not defined.
+60 Semantic error: Function 'func()' is not defined.
+61 Semantic error: Function 'func2(boolean, int)' is not defined.
+----------------------------
+Successful lexical analysis! No errors found.
+Successful syntax analysis! No errors found.

@@ -1,0 +1,35 @@
+/*
+ * Duplicidade de funções/procedimentos (sobrecarga)
+ */
+
+const {
+    int constante = 5;
+}
+
+procedure teste() {}
+
+procedure p(int a) {}
+
+procedure p(string a, real b) {}
+
+procedure p(real a, int b) {}
+
+procedure teste() {} // Erro. Já existe 
+
+procedure p(int x, real y) {}
+
+function int f() { return 1; }
+
+function real f() { return 1.1; } // Erro de duplicidade.
+
+function boolean f(real a) { return false; }
+
+function int f(real a) { return 1; } // Erro. já existe f(real)
+
+function string f(string a) { return ""; }
+
+function real f() { return 1.2; } // Erro. já existe f()
+
+function string f(real a) { return "test"; } // Erro. Já existe f(real)
+
+start() {}

@@ -35,7 +35,7 @@ for filePath in files:
         print('--------------------------------------------------')
         print("Analyzing "+path.basename(inputFile.name))
         tokens = lexical_analyzer.analyze()
-        lexical_analyzer.write_tokens(outputFile)
+        # lexical_analyzer.write_tokens(outputFile)
         lexical_analyzer.write_errors(outputFile)
         if(lexical_analyzer.get_errors() == 0):
             parser = Parser(tokens, outputFile)

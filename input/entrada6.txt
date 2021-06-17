@@ -1,0 +1,62 @@
+/*
+ * Chamada de funções/procedimentos
+ */
+
+var {
+	boolean a;
+	int b;
+	real c;
+	string d;
+}
+
+function real f1(real c, string d) {
+	print(d);
+	return c + 1.0;
+}
+
+procedure p0() {
+	print(a, b);
+}
+
+procedure p1(boolean a, int b) {
+	print(a, b);
+}
+
+procedure p2(int b, boolean a) {
+	print(a, b);
+}
+
+function boolean f0() {
+	f2("String de teste", 5.0 + 6.5); //Erro. f2(string, real) ainda nao foi declarado.
+	return true;
+}
+
+function string f2(string d, real c) {
+	print(c, ":", d);
+	f0();
+	return "ok";
+}
+
+
+start() {
+	p0();
+	p0(a);    // Erro. Não existe p0(boolean).
+
+	p1(a || true, b);
+	p1(b + 654 * 5, a); // Erro. Não existe p1(int, boolean).
+
+	p2(a, b); // Erro. Não existe p2(boolean, int).
+	p2(b, a);
+
+	f0();
+	f0(c);    // Erro. Não existe f0(real)
+
+	f1(c, d);
+	f1(d, c); // Erro. Não existe f1(string, real)
+
+	f2(c, d); // Erro. Não existe f2(real, string)
+	f2(d, c);
+
+	func(); // Erro. Não existe func()
+	func2(a,b); // Erro. Não existe func2(boolean, int)
+}

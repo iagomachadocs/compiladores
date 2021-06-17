@@ -1,0 +1,31 @@
+/*
+ * Identificadores não declarados
+ */
+
+var {
+	int a;
+}
+
+function int f(int a) {
+	var {
+		int a = 10; //Identificador 'a' já foi declarado como parâmetro da função
+
+		real c;
+	}
+
+	c = 3.14;
+	d = "test"; // Erro em 'd'. Não declarado.
+
+	return a;
+}
+
+start() {
+	var {
+		boolean a = true, c = true; 
+	}
+
+	f(10);
+	f(); // Erro. Função 'f()' sem argumentos não declarada, apenas a 'f(int)' foi declarada. 
+	func();   // Função não declarada.
+	func_2(7); // Erro. Função não declarada
+}
