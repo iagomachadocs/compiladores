@@ -1168,5 +1168,15 @@ class Parser:
         else:
           self.output.write('Syntax analysis failed! {} errors found.\n'.format(self.errors))
           print('-> Syntax analysis failed! {} errors found.'.format(self.errors))
+      if(self.semantic.errors == 0):
+        self.output.write('Successful semantic analysis! No errors found.\n')
+        print('-> Successful semantic analysis! No errors found.')
+      else:
+        if(self.semantic.errors == 1):
+          self.output.write('Semantic analysis failed! 1 error found.\n')
+          print('-> Semantic analysis failed! 1 error found.')
+        else:
+          self.output.write('Semantic analysis failed! {} errors found.\n'.format(self.semantic.errors))
+          print('-> Semantic analysis failed! {} errors found.'.format(self.semantic.errors))
         
       

@@ -7,3 +7,4 @@
 ----------------------------
 Successful lexical analysis! No errors found.
 Successful syntax analysis! No errors found.
+Semantic analysis failed! 5 errors found.

@@ -5,6 +5,7 @@ class SemanticAnalyzer:
       'global': {},
       'start': {}
     }
+    self.errors = 0
   
   def error(self, error, line, value):
     messages = {
@@ -25,6 +26,7 @@ class SemanticAnalyzer:
     }
     self.output.write('{} Semantic error: {}\n'.format(line, messages[error]))
     print('-> Semantic error - line {}: {}'.format(line, messages[error]))
+    self.errors += 1
 
   def check_type(self, token_type, scope='global'):
     PRIMITIVE_TYPES = set(['int', 'real', 'boolean', 'string'])
