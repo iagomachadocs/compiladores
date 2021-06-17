@@ -1,3 +1,8 @@
+"""
+ Código de um analisador semântico, desenvolvido como solução do Problema 4
+ do MI-Processadores de Linguagem de Programação.
+ Autor: Iago Machado da Conceição Silva
+"""
 class SemanticAnalyzer:
   def __init__(self, output):
     self.output = output
