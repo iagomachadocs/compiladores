@@ -340,7 +340,12 @@ class SemanticAnalyzer:
       return
     else:
       if(type_expected != type_assigned):
-        self.error('wrong type', line, type_expected)
+        if(type_expected in self.scopes['global'] and self.scopes['global'][type_expected]['class'] == 'type'):
+          type_expected = self.scopes['global'][type_expected]['type']
+          if(type_expected != type_assigned):
+            self.error('wrong type', line, type_expected)
+        else:
+          self.error('wrong type', line, type_expected)
 
 
             

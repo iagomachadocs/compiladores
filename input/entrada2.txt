@@ -1,14 +1,14 @@
 const {
    string teste = "uma string de teste";
-   boolean bool = true, bool2 = false;
+   boolean bool = true, bool2 = 11;
    int i = 0.5;
-   real b = 3.42, pi = 3.14;
+   real b = 3.42, pi = 3.14, letra = "a";
    typedef int tipo;
    tipo c = 3;
 }
 
 var {
-  int a = 1;
+  int a = true;
 }
 
 struct ponto {

@@ -435,12 +435,14 @@ class Parser:
       if(token != None and token.value == '='):
         self.__next_token()
         token = self.__token()
+        type_assigned = None
         if(token != None and token.value == '{'):
           self.__next_token()
           self.__array_decl()
         elif(token != None and (token.value in ['!', 'true', 'false', '(', 'global', 'local'] or token.key in ['IDE', 'NRO', 'CAD'])):
-          self.__exp('global')
+          type_assigned = self.__exp('global')
           self.semantic.identifier_declaration(identifier, 'global', identifier_attributes)
+          self.semantic.compare_types(const_type, type_assigned, token.line)
         else:
           self.__error('\'{\', \'!\', \'true\', \'false\', \'(\', IDENTIFIER, STRING or NUMBER', [',', ';'])
       else:
@@ -515,7 +517,8 @@ class Parser:
         self.__array_decl()
         self.__var_list(scope, var_type)
       elif(token != None and (token.value in ['!', 'true', 'false', '(', 'global', 'local'] or token.key in ['IDE', 'NRO', 'CAD'])):
-        self.__exp(scope)
+        type_assigned = self.__exp(scope)
+        self.semantic.compare_types(var_type, type_assigned, token.line)
         self.__var_list(scope, var_type)
       else:
         self.__error('\'{\', \'!\', \'true\', \'false\', \'(\', IDENTIFIER, STRING or NUMBER', ['int', 'real', 'boolean', 'string', 'identifier', 'typedef', 'struct', '}'])
