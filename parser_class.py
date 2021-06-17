@@ -62,18 +62,22 @@ class Parser:
       self.output.write(' Syntax error: Unexpected end of file. Expected {} but found None\n'.format(expected))
       print('-> Syntax error: Unexpected end of file. Expected {} but found None'.format(expected))
 
-  def __args_list(self, scope):
+  def __args_list(self, scope, args_list=[]):
     token = self.__token()
     if(token != None and token.value == ','):
       self.__next_token()
-      self.__exp(scope)
-      self.__args_list(scope)
+      arg_type = self.__exp(scope)
+      args_list.append(arg_type)
+      return self.__args_list(scope, args_list)
+    return args_list
 
-  def __args(self, scope):
+  def __args(self, scope, args_list=[]):
     token = self.__token()
     if(token != None and (token.value in ['!', 'true', 'false', '(', 'global', 'local'] or token.key in ['IDE', 'NRO', 'CAD'])):
-      self.__exp(scope)
-      self.__args_list(scope)
+      arg_type = self.__exp(scope)
+      args_list.append(arg_type)
+      return self.__args_list(scope, args_list)
+    return args_list
 
 
   def __id_value(self, scope, identifier):
@@ -83,10 +87,11 @@ class Parser:
     if(token != None and token.value == '('):
       function_call = True
       self.__next_token()
-      self.__args(scope)
+      args_list = self.__args(scope, [])
       token = self.__token()
       if(token != None and token.value == ')'):
         self.__next_token()
+        func_type = self.semantic.function_call(identifier, args_list)
       else:
         self.__error('\')\'', ['*', '/', '+', '-', '>', '<', '<=', '>=', '==', '!=', '&&', '||', '}', ']', ')', ',', ';'])
     elif(token != None and token.value == '['):
@@ -98,6 +103,8 @@ class Parser:
     accesses = self.__accesses(scope, [])
     if(not function_call):
       return self.semantic.check_accesses(scope, identifier_access, accesses)
+    else:
+      return func_type
 
   def __value(self, scope):
     token = self.__token()
@@ -280,8 +287,9 @@ class Parser:
       self.__access(scope)
       self.__accesses(scope)
     elif(token != None and token.key == 'IDE'):
+      identifier = token
       self.__next_token()
-      self.__id_value(scope)
+      self.__id_value(scope, identifier)
     elif(token != None and token.value == '('):
       self.__next_token()
       self.__log_exp(scope)
@@ -565,7 +573,7 @@ class Parser:
         self.__var_block('global')
     elif (token != None and token.value == 'var'):
       self.__next_token()
-      self.__var_block()
+      self.__var_block('global')
       token = self.__token()
       if(token != None and token.value == 'const'):
         self.__next_token()
@@ -636,7 +644,7 @@ class Parser:
         self.__error('IDENTIFIER', [')'])
     return params
 
-  def __else_stm(self, scope):
+  def __else_stm(self, scope, func_type):
     token = self.__token()
     if(token != None and token.value == 'else'):
       self.__next_token()
@@ -645,14 +653,14 @@ class Parser:
         self.__next_token()
       else:
         self.__local_fix('\'{\'')
-      self.__func_stms(scope)
+      self.__func_stms(scope, func_type)
       token = self.__token()
       if(token != None and token.value == '}'):
         self.__next_token()
       else:
         self.__error('\'}\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
 
-  def __if_stm(self, scope):
+  def __if_stm(self, scope, func_type):
     token = self.__token()
     if(token != None and token.value == '('):
       self.__next_token()
@@ -668,11 +676,11 @@ class Parser:
             self.__next_token()
           else:
             self.__local_fix('\'{\'')
-          self.__func_stms(scope)
+          self.__func_stms(scope, func_type)
           token = self.__token()
           if(token != None and token.value == '}'):
             self.__next_token()
-            self.__else_stm(scope)
+            self.__else_stm(scope, func_type)
           else:
             self.__error('\'}\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
         else:
@@ -682,7 +690,7 @@ class Parser:
     else:
       self.__error('\'(\'', ['if', 'while', 'print', 'read', 'global', 'local', 'identifier', 'return', '}'])
 
-  def __while_stm(self, scope):
+  def __while_stm(self, scope, func_type):
     token = self.__token()
     if(token != None and token.value == '('):
       self.__next_token()
@@ -695,7 +703,7 @@ class Parser:
           self.__next_token()
         else:
           self.__local_fix('\'{\'')
-        self.__func_stms(scope)
+        self.__func_stms(scope, func_type)
         token = self.__token()
         if(token != None and token.value == '}'):
           self.__next_token()
@@ -726,7 +734,7 @@ class Parser:
     token = self.__token()
     if(token != None and token.value == '('):
       self.__next_token()
-      self.__log_exp()
+      self.__log_exp(scope)
       token = self.__token()
       if(token != None and token.value == ')'):
         self.__next_token()
@@ -756,7 +764,7 @@ class Parser:
     token = self.__token()
     if(token != None and token.value == '('):
       self.__next_token()
-      self.__log_exp()
+      self.__log_exp(scope)
       token = self.__token()
       if(token != None and token.value == ')'):
         self.__next_token()
@@ -857,10 +865,11 @@ class Parser:
       self.__assign(scope, id_type)
     elif(token != None and token.value == '('):
       self.__next_token()
-      self.__args(scope)
+      args_list = self.__args(scope, [])
       token = self.__token()
       if(token != None and token.value == ')'):
         self.__next_token()
+        self.semantic.function_call(identifier, args_list)
         token = self.__token()
         if(token != None and token.value == ';'):
           self.__next_token()
@@ -896,7 +905,7 @@ class Parser:
       token = self.__token()
       if(token != None and token.value == '('):
         self.__next_token()
-        self.__args(scope)
+        self.__args(scope, [])
         token = self.__token()
         if(token != None and token.value == ')'):
           self.__next_token()
@@ -943,22 +952,23 @@ class Parser:
     else:
       self.__error('\'}\'', ['function', 'procedure', 'struct', 'typedef', 'start'])    
 
-  def __func_stms(self, scope):
+  def __func_stms(self, scope, func_type):
     token = self.__token()
     if(token != None and token.value == 'if'):
       self.__next_token()
-      self.__if_stm()
-      self.__func_stms(scope)
+      self.__if_stm(scope, func_type)
+      self.__func_stms(scope, func_type)
     elif(token != None and token.value == 'while'):
       self.__next_token()
-      self.__while_stm()
-      self.__func_stms(scope)
+      self.__while_stm(scope, func_type)
+      self.__func_stms(scope, func_type)
     elif(token != None and (token.key == 'IDE' or token.value == 'local' or token.value == 'global' or token.value == 'print' or token.value == 'read')):
       self.__var_stm(scope)
-      self.__func_stms(scope)
+      self.__func_stms(scope, func_type)
     elif(token != None and token.value == 'return'):
       self.__next_token()
-      self.__exp(scope)
+      exp_type = self.__exp(scope)
+      self.semantic.compare_types(func_type, exp_type, token.line)
       token = self.__token()
       if(token != None and token.value == ';'):
         self.__next_token()
@@ -966,7 +976,7 @@ class Parser:
         self.__error('\';\'', ['}'])
 
 
-  def __func_block(self, scope):
+  def __func_block(self, scope, func_type):
     token = self.__token()
     if(token != None and token.value == '{'):
       self.__next_token()
@@ -976,7 +986,7 @@ class Parser:
     if(token != None and token.value == 'var'):
       self.__next_token()
       self.__var_block(scope)
-    self.__func_stms(scope)
+    self.__func_stms(scope, func_type)
     token = self.__token()
     if(token != None and token.value == '}'):
       self.__next_token()
@@ -999,7 +1009,7 @@ class Parser:
           if(token != None and token.value == ')'):
             name = self.semantic.function_declaration(func, func_type, params)
             self.__next_token()
-            self.__func_block(name)
+            self.__func_block(name, func_type)
           else:
             self.__error('\')\'', ['function', 'procedure', 'struct', 'typedef', 'start'])
         else:
@@ -1146,7 +1156,6 @@ class Parser:
       print('-> Syntax analysis failed. Empty file.')
     else:
       self.__program()
-      # print(self.semantic.scopes)
       self.output.write('----------------------------\n')
       self.output.write('Successful lexical analysis! No errors found.\n')
       if(self.errors == 0):

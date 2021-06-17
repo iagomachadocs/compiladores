@@ -11,6 +11,7 @@ class SemanticAnalyzer:
       'duplicated identifier': 'Identifier \'{}\' has already been declared.'.format(value),
       'invalid type': '\'{}\' is not a valid type.'.format(value),
       'duplicated function': 'Function \'{}\' has already been declared.'.format(value),
+      'function not defined': 'Function \'{}\' is not defined.'.format(value),
       'duplicated procedure': 'Procedure \'{}\' has already been declared.'.format(value),
       'not defined': '\'{}\' is not defined.'.format(value),
       'array index type': 'Array index must be integer.',
@@ -73,10 +74,13 @@ class SemanticAnalyzer:
     string += ')'
     return string
   
-  def params_declaration(self, scope, params):
+  def params_declaration(self, scope, params, line):
     for param in params:
       name = param['name']
-      self.scopes[scope][name] = {'type': param['type'], 'class': 'var', 'array': param['array']}
+      if(name not in self.scopes[scope]):
+        self.scopes[scope][name] = {'type': param['type'], 'class': 'var', 'array': param['array']}
+      else:
+        self.error('duplicated identifier', line, name)
 
   def function_declaration(self, token, return_type, params):
     params_str = self.params_to_string(params)
@@ -88,7 +92,7 @@ class SemanticAnalyzer:
         if(valid_return_type):
           self.scopes['global'][name] = {'type': return_type, 'class': 'function'}
           self.scopes[name] = {}
-          self.params_declaration(name, params)
+          self.params_declaration(name, params, token.line)
           return name
         else:
           self.error('invalid type', token.line, return_type)
@@ -108,7 +112,7 @@ class SemanticAnalyzer:
       if(valid_types == True):
         self.scopes['global'][name] = {'type': None, 'class': 'procedure'}
         self.scopes[name] = {}
-        self.params_declaration(name, params)
+        self.params_declaration(name, params, token.line)
         return name
       else:
         self.error('invalid type', token.line, valid_types)
@@ -234,6 +238,24 @@ class SemanticAnalyzer:
         self.error('invalid operation', line, first_type)
         return None
 
+  def function_call(self, token, args_list):
+    func = token.value + '('
+    first = True
+    for arg in args_list:
+      if(arg == None):
+        return None
+      if(first):
+        first = False
+      else:
+        func = func + ', '
+      func = func + arg
+    func = func + ')'
+    if(func in self.scopes['global']):
+      return self.scopes['global'][func]['type']
+    else:
+      self.error('function not defined', token.line, func)
+      return None
+
   def check_accesses(self, scope, identifier, accesses, scope_definition=None):
     token = identifier['token']
     if(scope_definition == None):
@@ -283,6 +305,7 @@ class SemanticAnalyzer:
               return
             key = prop['token']
             obj = self.scopes[obj_type][key.value]
+          return obj['type']
     else:
       if(scope_definition == 'global'):
         scope = 'global'
@@ -330,10 +353,10 @@ class SemanticAnalyzer:
               return
             key = prop['token']
             obj = self.scopes[obj_type][key.value]
+          return obj['type']
       else:
         self.error('not defined', token.line, token.value)
         return
-    return obj['type']
 
   def compare_types(self, type_expected, type_assigned, line):
     if(type_expected == None or type_assigned == None):
