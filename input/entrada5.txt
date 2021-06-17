@@ -19,7 +19,7 @@ function int f() {
 	c = 3.14;
 	local.d = 2.17;
 
-	global.e = 2.718; // Erro. Identificador não declarado. Não é possível atribuir um valor a um identificador não declarado
+	global.e = 2.718; // Erro. Identificador não declarado.
 	global.d = 0.14; // Erro. Não é possível atribuir valor a constantes.
 
 	return 0;
