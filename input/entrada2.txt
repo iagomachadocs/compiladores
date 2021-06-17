@@ -1,7 +1,7 @@
 const {
    string teste = "uma string de teste";
    boolean bool = true, bool2 = false;
-   int i = 0;
+   int i = 0.5;
    real b = 3.42, pi = 3.14;
    typedef int tipo;
    tipo c = 3;
@@ -46,6 +46,6 @@ start() {
     struct teste pog;
     struct ponto a;
   }
-  w = j;
+  local.a.x = pog[2];
 
 }   

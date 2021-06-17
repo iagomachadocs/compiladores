@@ -77,8 +77,11 @@ class Parser:
 
 
   def __id_value(self, scope, identifier):
+    identifier_access = {'token': identifier}
+    function_call = False
     token = self.__token()
     if(token != None and token.value == '('):
+      function_call = True
       self.__next_token()
       self.__args(scope)
       token = self.__token()
@@ -89,10 +92,16 @@ class Parser:
     elif(token != None and token.value == '['):
       self.__next_token()
       self.__arrays(scope)
+      identifier_access['array'] = True
+    else:
+      identifier_access['array'] = False
     accesses = self.__accesses(scope, [])
+    if(not function_call):
+      return self.semantic.check_accesses(scope, identifier_access, accesses)
 
   def __value(self, scope):
     token = self.__token()
+    id_type = None
     if(token != None and token.value == '-'):
       token_aux = token
       self.__next_token()
@@ -115,14 +124,14 @@ class Parser:
       accesses = self.__accesses(scope, [])
       if(len(first_access) > 0):
         identifier = first_access[0]
-        self.semantic.check_accesses(scope, identifier, accesses, scope_definition)
+        id_type = self.semantic.check_accesses(scope, identifier, accesses, scope_definition)
     elif(token != None and token.key == 'IDE'):
-      identifier = token.value
+      identifier = token
       self.__next_token()
-      self.__id_value(scope, identifier)
+      id_type = self.__id_value(scope, identifier)
     elif(token != None and token.value == '('):
       self.__next_token()
-      self.__exp(scope)
+      id_type = self.__exp(scope)
       token = self.__token()
       if(token != None and token.value == ')'):
         self.__next_token()
@@ -793,12 +802,12 @@ class Parser:
       accesses = self.__accesses(scope, accesses)
     return accesses
 
-  def __assign(self, scope):
+  def __assign(self, scope, type_expected):
     token = self.__token()
     if(token != None and token.value == '='):
       self.__next_token()
-      type_exp = self.__exp(scope)
-      print(type_exp)
+      type_assigned = self.__exp(scope)
+      self.semantic.compare_types(type_expected, type_assigned, token.line)
       token = self.__token()
       if(token != None and token.value == ';'):
         self.__next_token()
@@ -825,22 +834,24 @@ class Parser:
     token = self.__token()
     if(token != None and (token.value == '=' or token.value == '++' or token.value == '--')):
       self.semantic.check_const_assign(identifier, scope)
-      self.__assign(scope)
+      identifier_access = {'token': identifier, 'array': False }
+      id_type = self.semantic.check_accesses(scope, identifier_access, [])  
+      self.__assign(scope, id_type)
     elif(token != None and token.value == '['):
       self.__next_token()
       self.__arrays(scope)
       identifier_access = {'token': identifier, 'array': True }
       accesses = self.__accesses(scope, [])
       self.semantic.check_const_assign(identifier, scope)
-      self.semantic.check_accesses(scope, identifier_access, accesses)
-      self.__assign(scope)
+      id_type = self.semantic.check_accesses(scope, identifier_access, accesses)
+      self.__assign(scope, id_type)
     elif(token != None and token.value == '.'):
       identifier_access = {'token': identifier, 'array': False}
       accesses = self.__access(scope, [])
       accesses = self.__accesses(scope, accesses)
       self.semantic.check_const_assign(identifier, scope)
-      self.semantic.check_accesses(scope, identifier_access, accesses)
-      self.__assign(scope)
+      id_type = self.semantic.check_accesses(scope, identifier_access, accesses)
+      self.__assign(scope, id_type)
     elif(token != None and token.value == '('):
       self.__next_token()
       self.__args(scope)
@@ -867,11 +878,12 @@ class Parser:
       first_access = self.__access(scope, [])
       first_identifier = first_access[0]
       accesses = self.__accesses(scope, [])
+      id_type = None
       if(len(first_access) > 0):
         identifier = first_identifier['token']
         self.semantic.check_const_assign(identifier, scope, scope_definition)
-        self.semantic.check_accesses(scope, first_identifier, accesses, scope_definition)
-      self.__assign(scope)
+        id_type = self.semantic.check_accesses(scope, first_identifier, accesses, scope_definition)
+      self.__assign(scope, id_type)
     elif(token != None and token.key == 'IDE'):
       identifier = token
       self.__next_token()
@@ -1131,7 +1143,7 @@ class Parser:
       print('-> Syntax analysis failed. Empty file.')
     else:
       self.__program()
-      print(self.semantic.scopes)
+      # print(self.semantic.scopes)
       self.output.write('----------------------------\n')
       self.output.write('Successful lexical analysis! No errors found.\n')
       if(self.errors == 0):

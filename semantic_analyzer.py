@@ -19,7 +19,8 @@ class SemanticAnalyzer:
       'invalid property': '\'{}\' is not a valid property.'.format(value),
       'not struct': '\'{}\' is not a struct.'.format(value),
       'invalid operation': 'Invalid operation for type \'{}\'.'.format(value),
-      'distinct types': 'Operations between different types not allowed.'
+      'distinct types': 'Operation not allowed for different types.',
+      'wrong type': 'Incorrect type assigned. Expected \'{}\'.'.format(value),
     }
     self.output.write('{} Semantic error: {}\n'.format(line, messages[error]))
     print('-> Semantic error - line {}: {}'.format(line, messages[error]))
@@ -332,7 +333,14 @@ class SemanticAnalyzer:
       else:
         self.error('not defined', token.line, token.value)
         return
+    return obj['type']
 
+  def compare_types(self, type_expected, type_assigned, line):
+    if(type_expected == None or type_assigned == None):
+      return
+    else:
+      if(type_expected != type_assigned):
+        self.error('wrong type', line, type_expected)
 
 
             
