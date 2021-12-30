@@ -1,5 +1,5 @@
 # Compiladores
-Códigos do MI - Processadores de Linguagem de Programação e materiais de estudo
+Códigos do MI - Processadores de Linguagem de Programação
 
 # Instruções de execução
 
