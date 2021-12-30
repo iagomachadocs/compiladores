@@ -1,6 +1,8 @@
 # Compiladores
 Códigos do MI - Processadores de Linguagem de Programação
 
+Implementação de um analisador léxico, sintático e semântico em Python.
+
 # Instruções de execução
 
 * Insira os arquivos com o nome entradaX.txt na pasta input.
